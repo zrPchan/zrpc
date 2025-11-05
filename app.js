@@ -14,6 +14,7 @@ let TARGET_MINUTES = 5; // default target (minutes)
 let TARGET_SECONDS = TARGET_MINUTES * 60;
 const RING_CIRCUM = 2 * Math.PI * 88; // r=88 as in SVG
 let overtimeAlerted = false;
+let editingTaskId = null; // when non-null, end modal saves will update this task instead of creating a new one
 
 render();
 
@@ -135,6 +136,8 @@ if(endBtnMain){
 }
 
 function openEndModal(isAuto = false){
+  // entering edit mode should be explicit; reset any previous edit id when opening fresh modal
+  editingTaskId = null;
   if(!sessionStart){ sessionStart = now(); }
   // Ensure any embedded overlays are hidden so they don't intercept touches/clicks
   try{
@@ -222,6 +225,33 @@ function closeModal(){
 function saveTaskAndClose(){
   if(DEV) console.log('saveTaskAndClose: called');
   stopCountdown();
+  // If we're editing an existing task, perform an update instead of creating a new record
+  if(editingTaskId){
+    try{
+      const updates = {
+        mood: +val("mood"),
+        effort: +val("effort"),
+        taskname: (val("taskname") || '').trim(),
+        insight: (val("insight") || '').trim(),
+        nexttask: (val("nexttask") || '').trim(),
+      };
+      // Enforce per-field limits
+      if(updates.taskname.length > MAX_FIELD) updates.taskname = updates.taskname.slice(0, MAX_FIELD);
+      if(updates.insight.length > MAX_FIELD) updates.insight = updates.insight.slice(0, MAX_FIELD);
+      if(updates.nexttask.length > MAX_FIELD) updates.nexttask = updates.nexttask.slice(0, MAX_FIELD);
+      const ok = updateTask(editingTaskId, updates);
+      if(!ok){ showToast('編集の保存に失敗しました'); console.error('updateTask returned false'); return; }
+      editingTaskId = null;
+      try{ showToast('編集を保存しました'); }catch(e){}
+    }catch(e){ console.error('saveTaskAndClose (edit) failed', e); try{ showToast('保存中にエラーが発生しました: ' + (e && e.message || e)); }catch(_){ } return; }
+    // close modal and refresh
+    try{ const dlgEl = document.getElementById("endModal"); if(dlgEl && typeof dlgEl.close === 'function'){ dlgEl.close(); } else if(dlgEl){ dlgEl.style.display = 'none'; dlgEl.classList.remove('modal-fallback'); } }catch(e){ }
+    render();
+    document.getElementById("startBtn").disabled = false;
+    try{ updateTargetUI(); }catch(e){}
+    return;
+  }
+
   const end = now();
   const elapsed = sessionStart ? (end - sessionStart) : 0;
   const layer = elapsed < 60 ? 0 : Math.floor(elapsed / UNIT_SEC);
@@ -729,10 +759,14 @@ function renderLogs(){
   // show full comment (no truncation) so user can read entire saved text
   const short = comment || '';
     return `
-      <div class="log-item">
+      <div class="log-item" data-task-id="${t.id}">
         <div class="log-meta"><div class="log-time">${meta}</div></div>
         <div class="log-meta"><div class="log-mood-effort">${[mood, effort].filter(x=>x).join(' ')}</div></div>
-  <div class="log-comment">${short || '<span class="log-empty-text">(コメント無し)</span>'}</div>
+        <div class="log-comment">${short || '<span class="log-empty-text">(コメント無し)</span>'}</div>
+        <div class="log-actions">
+          <button class="log-edit" onclick="window.editTask && window.editTask('${t.id}')">編集</button>
+          <button class="log-delete" onclick="window.deleteTask && window.deleteTask('${t.id}')">削除</button>
+        </div>
       </div>`;
   });
 
@@ -740,6 +774,57 @@ function renderLogs(){
 }
 
 function clearInputs(){ ["taskname","insight","nexttask"].forEach(id=>{ const el=document.getElementById(id); if(el) el.value = ""; }); document.getElementById("countdown").textContent = String(AUTO_SAVE_TIME); }
+
+// Update an existing task by id. Returns true on success.
+function updateTask(id, updates){
+  try{
+    const key = `tasks:${keyDay()}`;
+    const arr = JSON.parse(localStorage.getItem(key) || "[]");
+    const idx = arr.findIndex(x => x && x.id === id);
+    if(idx === -1) return false;
+    const item = arr[idx];
+    // Merge allowed fields only
+    const allowed = ['mood','effort','taskname','insight','nexttask'];
+    allowed.forEach(k => { if(typeof updates[k] !== 'undefined') item[k] = updates[k]; });
+    arr[idx] = item;
+    localStorage.setItem(key, JSON.stringify(arr));
+    try{ renderLogs(); }catch(e){}
+    return true;
+  }catch(e){ console.error('updateTask failed', e); return false; }
+}
+
+function deleteTask(id){
+  try{
+    const key = `tasks:${keyDay()}`;
+    const arr = JSON.parse(localStorage.getItem(key) || "[]");
+    const newArr = arr.filter(x => x && x.id !== id);
+    localStorage.setItem(key, JSON.stringify(newArr));
+    try{ renderLogs(); }catch(e){}
+    showToast('記録を削除しました');
+    return true;
+  }catch(e){ console.error('deleteTask failed', e); showToast('削除に失敗しました'); return false; }
+}
+
+function editTask(id){
+  try{
+    const key = `tasks:${keyDay()}`;
+    const arr = JSON.parse(localStorage.getItem(key) || "[]");
+    const item = arr.find(x => x && x.id === id);
+    if(!item) { showToast('編集対象が見つかりません'); return; }
+    // populate modal inputs
+    document.getElementById('taskname').value = item.taskname || '';
+    document.getElementById('insight').value = item.insight || '';
+    document.getElementById('nexttask').value = item.nexttask || '';
+    try{ document.getElementById('mood').value = String(item.mood || 0); }catch(e){}
+    try{ document.getElementById('effort').value = String(item.effort || 0); }catch(e){}
+    // set editing flag and open modal
+    editingTaskId = id;
+    openEndModal(false);
+  }catch(e){ console.error('editTask failed', e); showToast('編集開始に失敗しました'); }
+}
+
+// Expose to window for inline onclick handlers
+try{ window.editTask = editTask; window.deleteTask = deleteTask; window.updateTask = updateTask; }catch(e){}
 
 // Expose for debugging and quick manual testing
 window._bottle = { now, loadToday, saveToday, saveTask, applyLayer,
