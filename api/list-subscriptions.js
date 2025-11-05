@@ -1,4 +1,4 @@
-const { db, requireAdminAuth } = require('./_lib');
+const { supabase, requireAdminAuth } = require('./_lib');
 
 module.exports = async (req, res) => {
   if (req.method !== 'GET') return res.status(405).send('Method Not Allowed');

@@ -8,7 +8,7 @@ module.exports = async (req, res) => {
   if(!ok) return; // response already sent
   try {
     const { id, endpoint, payload } = req.body || {};
-    if (!db) return res.status(500).json({ error: 'Deta not configured (DETA_PROJECT_KEY missing)' });
+  if (!supabase) return res.status(500).json({ error: 'Supabase not configured (SUPABASE_URL / SERVICE_ROLE_KEY missing)' });
     const sendPayload = typeof payload === 'string' ? payload : JSON.stringify(payload || { title: 'Timer', body: '⏰ Timer ended' });
 
     const sendToSub = async (sub) => {
