@@ -977,6 +977,8 @@ document.addEventListener('DOMContentLoaded', ()=>{
                       if(banner){
                         if(msgEl) msgEl.textContent = '新しいバージョンが利用可能です。更新するとページがリロードされます。';
                         banner.style.display = 'flex';
+                        // show manual check/update control when update is available
+                        try{ const chk = document.getElementById('checkUpdateBtn'); if(chk) chk.style.display = 'inline-block'; }catch(_){ }
                         // cleanup previous handlers
                         try{ nowBtn && nowBtn.replaceWith(nowBtn.cloneNode(true)); }catch(_){}
                         try{ laterBtn && laterBtn.replaceWith(laterBtn.cloneNode(true)); }catch(_){}
@@ -998,6 +1000,16 @@ document.addEventListener('DOMContentLoaded', ()=>{
           });
         });
       }).catch(()=>{/* noop */});
+
+      // If registration already has a waiting worker (e.g., deployed while client was closed), show update UI
+      try{
+        if(reg && reg.waiting){
+          const banner = document.getElementById('updateBanner');
+          const msgEl = banner && banner.querySelector('.msg');
+          if(banner){ if(msgEl) msgEl.textContent = '新しいバージョンが利用可能です。更新するとページがリロードされます。'; banner.style.display = 'flex'; }
+          try{ const chk = document.getElementById('checkUpdateBtn'); if(chk) chk.style.display = 'inline-block'; }catch(_){ }
+        }
+      }catch(e){/* ignore */}
 
       // When the active controller changes (new SW took control), reload to load latest assets
       navigator.serviceWorker.addEventListener('controllerchange', () => {

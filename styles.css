@@ -159,7 +159,7 @@ button:disabled{opacity:0.5;cursor:not-allowed}
 .save-flash{box-shadow:0 0 0 3px rgba(184,146,88,0.45);}
 
 /* update controls (manual check) */
-.update-controls{max-width:420px;margin:6px auto 0 auto;text-align:center}
+.update-controls{max-width:420px;margin:6px auto 0 auto;text-align:center;display:none}
 .update-controls .btn-ghost{border-radius:8px;padding:6px 10px}
 
 /* Small screen adjustments */
