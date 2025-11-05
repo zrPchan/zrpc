@@ -18,9 +18,20 @@ body{font-family:'Baloo 2','Inter',system-ui,-apple-system,'Segoe UI',Roboto,Hel
 .sand{position:absolute;left:8px;right:8px;bottom:8px;height:calc(100% - 16px);overflow:hidden;border-radius:18px}
 .sand-layer{position:absolute;left:0;width:100%;box-sizing:border-box;border-top:1px solid rgba(0,0,0,0.03);border-radius:8px}
 .sand-layer.partial{border-top:1px solid rgba(0,0,0,0.06)}
-.controls{display:flex;gap:12px;justify-content:center;margin-top:12px}
-button{padding:10px 14px;border-radius:999px;border:none;background:linear-gradient(180deg,#fff,#fff);box-shadow:0 6px 18px rgba(0,0,0,0.06);cursor:pointer;font-weight:600}
+.controls{display:flex;gap:12px;justify-content:center;margin-top:12px;flex-wrap:wrap}
+.controls button{min-width:84px}
+
+/* base button */
+button{padding:10px 14px;border-radius:999px;border:none;background:linear-gradient(180deg,#fff,#fff);box-shadow:0 6px 18px rgba(0,0,0,0.06);cursor:pointer;font-weight:600;transition:transform .12s ease,box-shadow .12s ease}
 button:hover{transform:translateY(-2px)}
+button:active{transform:translateY(0)}
+button:focus{outline:3px solid rgba(246,164,217,0.18);outline-offset:3px}
+
+/* button variants */
+.btn-primary, .primary{ background: linear-gradient(180deg,var(--accent),var(--accent-2)); color: #5a2b3a; box-shadow: 0 10px 26px rgba(246,164,217,0.12) }
+.btn-outline{ background: transparent; border: 1px solid rgba(59,28,36,0.06); color: #40272f }
+.btn-ghost{ background: transparent; color: var(--muted); box-shadow:none }
+button[disabled], .btn-disabled{ opacity:0.5; cursor: default; transform:none }
 dialog{border:none;border-radius:12px;padding:14px;background:var(--card);box-shadow:0 12px 40px rgba(34,20,35,0.08)}
 /* Ensure dialog appears above embedded overlays (reset overlay z-index:80) */
 dialog[open], dialog.modal-fallback{position:fixed;z-index:1000;left:50%;top:50%;transform:translate(-50%,-50%);max-width:92%;box-shadow:0 12px 40px rgba(0,0,0,0.35);pointer-events:auto}
@@ -53,7 +64,7 @@ button:disabled{opacity:0.5;cursor:not-allowed}
 
 .log-list-outer{border-top:1px solid rgba(0,0,0,0.06);padding:8px}
 .log-list{max-height:260px;overflow:auto;padding:0;display:flex;flex-direction:column;gap:12px;margin:0 auto;width:100%;box-sizing:border-box}
-.log-item{background:linear-gradient(180deg,#fff,#fffaf3);border-radius:14px;padding:12px;border:1px solid rgba(0,0,0,0.04);box-shadow:0 8px 20px rgba(34,20,35,0.04);font-size:14px}
+.log-item{background:linear-gradient(180deg,#fff,#fffaf3);border-radius:14px;padding:14px;border:1px solid rgba(0,0,0,0.04);box-shadow:0 8px 20px rgba(34,20,35,0.04);font-size:14px}
 .log-item{overflow-wrap:anywhere}
 .log-meta{display:flex;gap:8px;color:#7b6b7b;font-size:12px;margin-bottom:8px}
 .log-layer{font-weight:700;color:var(--accent-3)}
@@ -147,3 +158,17 @@ button:disabled{opacity:0.5;cursor:not-allowed}
 
 /* Visual flash for save button when tapped to confirm interaction */
 .save-flash{box-shadow:0 0 0 3px rgba(184,146,88,0.45);}
+
+/* Small screen adjustments */
+@media (max-width:600px){
+  body{margin:12px}
+  .container-720{max-width:92%;margin:12px auto}
+  .bottle{width:130px;height:210px}
+  .circle-wrap{width:132px;height:132px}
+  .countdown-text{font-size:18px}
+  .controls{gap:8px}
+  .controls button{min-width:64px;padding:8px 10px;font-size:14px}
+  .log-list{gap:10px}
+  .log-item{padding:10px}
+  .stats .big{font-size:22px}
+}
