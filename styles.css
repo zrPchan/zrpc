@@ -172,3 +172,33 @@ button:disabled{opacity:0.5;cursor:not-allowed}
   .log-item{padding:10px}
   .stats .big{font-size:22px}
 }
+
+/* Extra small screen / mobile refinements to prevent layout breakage */
+@media (max-width:420px){
+  /* let main use most of the viewport */
+  main{max-width:98%;padding:10px}
+
+  /* make controls wrap and allow flexible buttons so they don't overflow */
+  .controls{flex-wrap:wrap;align-items:center}
+  .controls button{min-width:0;flex:1 1 auto;margin:6px 4px}
+
+  /* target row: stack on narrow screens */
+  .target-row{flex-wrap:wrap;gap:6px;justify-content:center}
+  #targetMinutesInput{width:64px}
+
+  /* reduce bottle and circle sizes slightly */
+  .bottle{width:120px;height:190px}
+  .circle-wrap{width:120px;height:120px}
+  .countdown-text{font-size:16px}
+
+  /* reduce top spacing so the important UI is visible without excessive scroll */
+  .stats{margin-top:8px}
+  .countdown-ui{margin-top:6px}
+
+  /* make logs occupy full width and readable */
+  .log-list{max-width:100%;padding:6px}
+  .log-item{padding:10px}
+
+  /* ensure dialogs and overlays fit */
+  dialog, .popup-box{max-width:94%}
+}
