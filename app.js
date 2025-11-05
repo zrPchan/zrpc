@@ -1316,6 +1316,28 @@ if('serviceWorker' in navigator){
                     }
                   }catch(e){/* ignore */}
             }
+
+                  // Manual update check button: allow user to check for a new SW and activate it immediately
+                  try{
+                    const checkBtn = document.getElementById('checkUpdateBtn');
+                    if(checkBtn){
+                      checkBtn.addEventListener('click', ()=>{
+                        if(!('serviceWorker' in navigator)){ showToast('Service Worker 未対応'); return; }
+                        navigator.serviceWorker.getRegistration().then(reg => {
+                          if(!reg){ showToast('Service Worker が未登録です'); return; }
+                          // If there's already a waiting worker, request it to skip waiting
+                          if(reg.waiting){
+                            try{ reg.waiting.postMessage({ type: 'SKIP_WAITING' }); }catch(e){/* ignore */}
+                            return;
+                          }
+                          // Otherwise, ask the registration to check for updates
+                          reg.update().then(()=>{
+                            if(reg.waiting){ try{ reg.waiting.postMessage({ type: 'SKIP_WAITING' }); }catch(e){} } else { showToast('既に最新です'); }
+                          }).catch(()=>{ showToast('更新確認に失敗しました'); });
+                        }).catch(()=>{ showToast('更新確認中にエラーが発生しました'); });
+                      });
+                    }
+                  }catch(e){/* ignore */}
           }catch(e){/* ignore */}
     });
   }catch(e){/* ignore */}
