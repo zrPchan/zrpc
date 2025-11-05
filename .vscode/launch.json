@@ -2,7 +2,7 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "type": "pwa-node",
+      "type": "node",
       "request": "launch",
       "name": "Launch Server (server/index.js)",
       "program": "${workspaceFolder}/server/index.js",
@@ -13,7 +13,7 @@
       }
     },
     {
-      "type": "pwa-chrome",
+      "type": "chrome",
       "request": "launch",
       "name": "Launch Chrome (open http://localhost:3000/)",
       "url": "http://localhost:3000/",
@@ -23,7 +23,7 @@
     },
     {
       "name": "Attach to Node Process",
-      "type": "pwa-node",
+      "type": "node",
       "request": "attach",
       "processId": "${command:PickProcess}",
       "restart": false
