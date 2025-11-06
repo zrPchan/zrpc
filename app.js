@@ -18,6 +18,7 @@ let TARGET_SECONDS = TARGET_MINUTES * 60;
 const RING_CIRCUM = 2 * Math.PI * 88; // r=88 as in SVG
 let overtimeAlerted = false;
 let editingTaskId = null; // when non-null, end modal saves will update this task instead of creating a new one
+let endModalOpenedAt = null; // epoch seconds recorded when end modal is shown (used as task end time)
 
 render();
 
@@ -172,6 +173,8 @@ function openEndModal(isAuto = false){
   // Previously this function unconditionally cleared editingTaskId which prevented
   // edit flows from working and caused the cancel button to behave like "タスク続行".
   if(!sessionStart){ sessionStart = now(); }
+  // record the time the end modal was opened so saved task end uses this
+  try{ endModalOpenedAt = now(); }catch(e){ endModalOpenedAt = Date.now()/1000; }
   // Ensure any embedded overlays are hidden so they don't intercept touches/clicks
   try{
     const overlay = document.getElementById('resetConfirmOverlay');
@@ -264,6 +267,8 @@ function closeModal(){
   const dlg = document.getElementById("endModal");
   try{ if(typeof dlg.close === 'function'){ dlg.close(); } else { dlg.style.display = 'none'; dlg.classList.remove('modal-fallback'); } }catch(e){ dlg.style.display = 'none'; dlg.classList.remove('modal-fallback'); }
   stopCountdown();
+  // clear any recorded modal-open timestamp
+  endModalOpenedAt = null;
 }
 
 function saveTaskAndClose(){
@@ -286,6 +291,8 @@ function saveTaskAndClose(){
   const ok = storage.updateTask(editingTaskId, updates);
       if(!ok){ showToast('編集の保存に失敗しました'); console.error('updateTask returned false'); return; }
       editingTaskId = null;
+  // clear any recorded modal-open timestamp since edit completed
+  endModalOpenedAt = null;
       try{ showToast('編集を保存しました'); }catch(e){}
     }catch(e){ console.error('saveTaskAndClose (edit) failed', e); try{ showToast('保存中にエラーが発生しました: ' + (e && e.message || e)); }catch(_){ } return; }
     // close modal and refresh
@@ -298,7 +305,8 @@ function saveTaskAndClose(){
     return;
   }
 
-  const end = now();
+  // Use the time when the end modal was opened as the task end time if available.
+  const end = (typeof endModalOpenedAt === 'number' && endModalOpenedAt) ? endModalOpenedAt : now();
   const elapsed = appTimer ? appTimer.getElapsed() : (sessionStart ? (end - sessionStart) : 0);
   const layer = elapsed < 60 ? 0 : Math.floor(elapsed / UNIT_SEC);
   // Safely generate an id even on older browsers
@@ -341,6 +349,8 @@ function saveTaskAndClose(){
   sessionStart = null;
   if(appTimer) { appTimer.pause(); } else { stopTimerInterval(); }
     try{ showToast('保存しました'); }catch(e){}
+    // clear recorded modal-open timestamp now that the task has been persisted
+    endModalOpenedAt = null;
   }catch(e){
     console.error('saveTaskAndClose failed', e);
     try{ showToast('保存中にエラーが発生しました: ' + (e && e.message || e)); }catch(_){/* ignore */}
