@@ -876,6 +876,8 @@ function applyThemeId(id){
     const cls = 'theme-' + raw;
     try{ root.classList.add(cls); window._currentThemeClass = cls; }catch(e){}
     try{ localStorage.setItem(THEME_KEY, raw); }catch(e){}
+    // re-render UI (to pick up theme-driven styles such as sand colors)
+    try{ if(typeof render === 'function') render(); }catch(e){}
   }catch(e){ console.warn('applyThemeId failed', e); }
 }
 
