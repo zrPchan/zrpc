@@ -19,11 +19,14 @@ const RING_CIRCUM = 2 * Math.PI * 88; // r=88 as in SVG
 let overtimeAlerted = false;
 let editingTaskId = null; // when non-null, end modal saves will update this task instead of creating a new one
 let endModalOpenedAt = null; // epoch seconds recorded when end modal is shown (used as task end time)
+let targetNotified = false; // guard to prevent repeated target notifications
 
 render();
 
 document.getElementById("startBtn").addEventListener("click", () => {
   sessionStart = now();
+  // reset notification guard for this session so target alert can fire once
+  targetNotified = false;
   // give feedback
   document.getElementById("startBtn").disabled = true;
   // initialize running countdown
@@ -483,6 +486,9 @@ function updateCountdown(){
 
 // Notify the user that the target has been reached: play sound, show notification and vibrate if available
 function notifyTargetReached(){
+  // prevent repeated notifications for the same target event
+  if(targetNotified) return;
+  targetNotified = true;
   try{ playSE(); }catch(e){/* ignore */}
   try{
     if(navigator && typeof navigator.vibrate === 'function'){
@@ -568,6 +574,8 @@ if(toggleBtn){
       updateControlButtons();
     } else {
       // resume
+      // reset notification guard for resumed session so target alert can fire once
+      targetNotified = false;
       if(appTimer){
         // sessionStart sync
         try{ const cur = appTimer.getElapsed(); sessionStart = now() - cur; }catch(e){}
