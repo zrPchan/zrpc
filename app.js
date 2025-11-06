@@ -660,12 +660,14 @@ function render(){
       const g = lerp(darkRgb[1], lightRgb[1], t);
       const b = lerp(darkRgb[2], lightRgb[2], t);
   const color = rgbToHex(r,g,b);
-  // make base gradient very faint so dot texture (grain) stands out
-  const baseAlpha = 0.06; // very thin base gradient alpha
-  const baseColorRgba = `rgba(${r},${g},${b},${baseAlpha})`;
+  // make base gradient more visible so layer shading reads through the grain
+  const baseAlpha = 0.22; // stronger base alpha for clearer gradient
+  const baseColorRgbaStart = `rgba(${r},${g},${b},${baseAlpha})`;
+  // end color slightly darker to emphasize depth
+  const baseColorRgbaEnd = `rgba(${Math.max(0,r-28)},${Math.max(0,g-28)},${Math.max(0,b-28)},${baseAlpha})`;
   // create a set of small, randomly positioned dots to simulate grain (non-aligned)
   // stronger, denser dots and use multiply blending so layers darken when stacked
-  const dotAlpha = 0.55; // stronger opacity for darker grain (increased per user request)
+  const dotAlpha = 0.50; // keep dot alpha so grain remains visible
   const dots = [];
   const dotCount = 60; // higher density per full layer
   for(let d=0; d<dotCount; d++){
@@ -675,7 +677,7 @@ function render(){
     dots.push(`radial-gradient(circle ${size}px at ${px}% ${py}%, rgba(${darkRgb[0]},${darkRgb[1]},${darkRgb[2]},${dotAlpha}) 0%, rgba(${darkRgb[0]},${darkRgb[1]},${darkRgb[2]},${dotAlpha}) 60%, transparent 61%)`);
   }
   const overlayStr = dots.join(',');
-  const bgStyle = `background-image: ${overlayStr}, linear-gradient(${baseColorRgba}, ${baseColorRgba}); background-repeat: no-repeat; background-size: auto, 100% 100%; background-blend-mode: multiply;`;
+  const bgStyle = `background-image: ${overlayStr}, linear-gradient(${baseColorRgbaStart}, ${baseColorRgbaEnd}); background-repeat: no-repeat; background-size: auto, 100% 100%; background-blend-mode: multiply;`;
   layers.push(`<div class=\"sand-layer\" style=\"bottom:${bottomPct}%;height:10%;${bgStyle}\"></div>`);
     }
     // partial top layer
@@ -688,9 +690,10 @@ function render(){
       const g = lerp(darkRgb[1], lightRgb[1], t);
       const b = lerp(darkRgb[2], lightRgb[2], t);
   const color = rgbToHex(r,g,b);
-  const dotAlpha = 0.55;
-  const baseAlpha = 0.06;
-  const baseColorRgba = `rgba(${r},${g},${b},${baseAlpha})`;
+  const dotAlpha = 0.50;
+  const baseAlpha = 0.22;
+  const baseColorRgbaStart = `rgba(${r},${g},${b},${baseAlpha})`;
+  const baseColorRgbaEnd = `rgba(${Math.max(0,r-28)},${Math.max(0,g-28)},${Math.max(0,b-28)},${baseAlpha})`;
       const dots = [];
       const dotCount = 30; // increased density for partial top layer as well
       for(let d=0; d<dotCount; d++){
@@ -700,7 +703,7 @@ function render(){
         dots.push(`radial-gradient(circle ${size}px at ${px}% ${py}%, rgba(${darkRgb[0]},${darkRgb[1]},${darkRgb[2]},${dotAlpha}) 0%, rgba(${darkRgb[0]},${darkRgb[1]},${darkRgb[2]},${dotAlpha}) 60%, transparent 61%)`);
       }
       const overlayStr = dots.join(',');
-  const bgStyle = `background-image: ${overlayStr}, linear-gradient(${baseColorRgba}, ${baseColorRgba}); background-repeat: no-repeat; background-size: auto, 100% 100%; background-blend-mode: multiply;`;
+  const bgStyle = `background-image: ${overlayStr}, linear-gradient(${baseColorRgbaStart}, ${baseColorRgbaEnd}); background-repeat: no-repeat; background-size: auto, 100% 100%; background-blend-mode: multiply;`;
       layers.push(`<div class="sand-layer partial" style="bottom:${bottomPct}%;height:${heightPct}%;${bgStyle}"></div>`);
     }
     sandEl.innerHTML = layers.join('');
