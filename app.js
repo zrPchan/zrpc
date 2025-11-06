@@ -948,8 +948,12 @@ try{
   const themeGrid = document.getElementById('themeGrid'); if(themeGrid){ themeGrid.addEventListener('click', (ev)=>{ const btn = ev.target.closest && ev.target.closest('.theme-swatch'); if(!btn) return; const id = btn.getAttribute('data-theme'); if(id){ applyThemeId(id); closeThemes(); } }); }
 }catch(e){/* ignore binding errors */}
 
-// Apply saved theme on load (or leave default)
-try{ const saved = localStorage.getItem(THEME_KEY); if(saved) applyThemeId(saved); }catch(e){}
+// Apply saved theme on load (or default to 'sand')
+try{
+  const saved = localStorage.getItem(THEME_KEY);
+  if(saved) applyThemeId(saved);
+  else applyThemeId('sand');
+}catch(e){}
 
 
 // Mobile-visible toast helper for environments without console (iPhone)
