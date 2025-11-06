@@ -43,6 +43,7 @@ export function saveTask(t){
     const arr = JSON.parse(localStorage.getItem(key) || "[]");
     arr.push(t);
     localStorage.setItem(key, JSON.stringify(arr));
+    try{ if(typeof window !== 'undefined' && window.dispatchEvent){ window.dispatchEvent(new CustomEvent('sandstudy:tasks-changed',{detail:{action:'save', id:t && t.id}})); } }catch(e){}
     return true;
   }catch(e){ console.error('saveTask failed', e); return false; }
 }
@@ -58,6 +59,7 @@ export function updateTask(id, updates){
     allowed.forEach(k => { if(typeof updates[k] !== 'undefined') item[k] = updates[k]; });
     arr[idx] = item;
     localStorage.setItem(key, JSON.stringify(arr));
+    try{ if(typeof window !== 'undefined' && window.dispatchEvent){ window.dispatchEvent(new CustomEvent('sandstudy:tasks-changed',{detail:{action:'update', id}})); } }catch(e){}
     return true;
   }catch(e){ console.error('updateTask failed', e); return false; }
 }
@@ -68,6 +70,7 @@ export function deleteTask(id){
     const arr = JSON.parse(localStorage.getItem(key) || "[]");
     const newArr = arr.filter(x => x && x.id !== id);
     localStorage.setItem(key, JSON.stringify(newArr));
+    try{ if(typeof window !== 'undefined' && window.dispatchEvent){ window.dispatchEvent(new CustomEvent('sandstudy:tasks-changed',{detail:{action:'delete', id}})); } }catch(e){}
     return true;
   }catch(e){ console.error('deleteTask failed', e); return false; }
 }

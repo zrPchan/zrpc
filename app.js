@@ -888,6 +888,15 @@ function renderLogs(){
   }catch(e){/* ignore delegation errors */}
 }
 
+// Re-render logs when storage module notifies about changes (emitted by src/storage.js).
+// Use a small timeout to allow any modal close/reflow to complete before updating DOM.
+try{
+  window.addEventListener('sandstudy:tasks-changed', (ev)=>{
+    try{ setTimeout(()=>{ try{ renderLogs(); // show newest-first, then ensure scroll/top visibility
+      const c = document.getElementById('logList'); if(c) c.scrollTop = 0; }catch(e){} }, 20); }catch(e){}
+  });
+}catch(e){}
+
 function clearInputs(){ ["taskname","insight","nexttask"].forEach(id=>{ const el=document.getElementById(id); if(el) el.value = ""; }); document.getElementById("countdown").textContent = String(AUTO_SAVE_TIME); }
 
 // Update an existing task by id. Returns true on success.
