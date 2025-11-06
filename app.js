@@ -350,7 +350,7 @@ function saveTaskAndClose(){
   try{ renderLogs(); }catch(e){}
   applyLayer(layer);
   sessionStart = null;
-  if(appTimer) { appTimer.pause(); } else { stopTimerInterval(); }
+  if(appTimer) { try{ appTimer.stop(); }catch(e){ appTimer.pause && appTimer.pause(); } } else { stopTimerInterval(); }
     try{ showToast('保存しました'); }catch(e){}
     // clear recorded modal-open timestamp now that the task has been persisted
     endModalOpenedAt = null;
