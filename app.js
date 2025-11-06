@@ -834,36 +834,39 @@ try{
   const favListEl = document.getElementById('favList'); if(favListEl){ favListEl.addEventListener('dblclick', (ev)=>{ const item = ev.target.closest && ev.target.closest('.fav-item'); if(!item) return; const m = Number(item.getAttribute('data-min')); if(m){ setTargetMinutes(m); closeFavs(); } }); }
 }catch(e){/* ignore binding errors */}
 
-// --- Theme picker: 20 themes, apply and persist ---
+
+// --- Theme picker: palettes (basic / pastel / dark × sand, red, blue, green, pink, silver)
 const THEME_KEY = 'uiTheme:v1';
 const THEMES = [
-  {id:1,name:'Pastel Pink', c1:'#ffecf5', c2:'#ffe6f0'},
-  {id:2,name:'Mint Breeze', c1:'#e8fff3', c2:'#d8fff0'},
-  {id:3,name:'Ocean Foam', c1:'#e8f9ff', c2:'#d9f3ff'},
-  {id:4,name:'Sunny Peach', c1:'#fff3e6', c2:'#ffe8d0'},
-  {id:5,name:'Lavender', c1:'#f7edff', c2:'#f1e8ff'},
-  {id:6,name:'Aqua Mint', c1:'#e9fff8', c2:'#dffdf4'},
-  {id:7,name:'Coral', c1:'#fff0ea', c2:'#ffe6de'},
-  {id:8,name:'Sky Blue', c1:'#eef7ff', c2:'#e6f2ff'},
-  {id:9,name:'Warm Sand', c1:'#fff7ec', c2:'#fff2dd'},
-  {id:10,name:'Grape', c1:'#f1eaff', c2:'#eadfff'},
-  {id:11,name:'Rose', c1:'#fff1f3', c2:'#ffe6ea'},
-  {id:12,name:'Emerald', c1:'#eafff1', c2:'#dafde6'},
-  {id:13,name:'Golden', c1:'#fff6e6', c2:'#fff0d6'},
-  {id:14,name:'Indigo', c1:'#f3f0ff', c2:'#ece9ff'},
-  {id:15,name:'Candy', c1:'#fff5fb', c2:'#ffedf6'},
-  {id:16,name:'Seafoam', c1:'#e9fff8', c2:'#dff7ef'},
-  {id:17,name:'Blush', c1:'#fff7f6', c2:'#fff0ef'},
-  {id:18,name:'Cerulean', c1:'#f0fbff', c2:'#e6f6ff'},
-  {id:19,name:'Apricot', c1:'#fff7ee', c2:'#fff1dd'},
-  {id:20,name:'Cool Slate', c1:'#f4f7fa', c2:'#eef2f6'}
+  // Basic
+  {id:'basic-sand', name:'Basic — Sand', c1:'#fffaf5', c2:'#fff6ec'},
+  {id:'basic-red', name:'Basic — Red', c1:'#fff6f6', c2:'#fff1f1'},
+  {id:'basic-blue', name:'Basic — Blue', c1:'#f6fbff', c2:'#eef7ff'},
+  {id:'basic-green', name:'Basic — Green', c1:'#f6fff6', c2:'#f0fff0'},
+  {id:'basic-pink', name:'Basic — Pink', c1:'#fff7fb', c2:'#fff2f8'},
+  {id:'basic-silver', name:'Basic — Silver', c1:'#f7f8fa', c2:'#eef0f3'},
+  // Pastel
+  {id:'pastel-sand', name:'Pastel — Sand', c1:'#fffdf9', c2:'#fff9f2'},
+  {id:'pastel-red', name:'Pastel — Red', c1:'#fff7f8', c2:'#fff2f4'},
+  {id:'pastel-blue', name:'Pastel — Blue', c1:'#fbfdff', c2:'#f4f8ff'},
+  {id:'pastel-green', name:'Pastel — Green', c1:'#fbfff9', c2:'#f4fff2'},
+  {id:'pastel-pink', name:'Pastel — Pink', c1:'#fff9fb', c2:'#fff4f8'},
+  {id:'pastel-silver', name:'Pastel — Silver', c1:'#f7f9fb', c2:'#eef4f8'},
+  // Dark
+  {id:'dark-sand', name:'Dark — Sand', c1:'#2b241f', c2:'#2f2a23'},
+  {id:'dark-red', name:'Dark — Red', c1:'#2b1f21', c2:'#301a1d'},
+  {id:'dark-blue', name:'Dark — Blue', c1:'#0f2030', c2:'#102534'},
+  {id:'dark-green', name:'Dark — Green', c1:'#10261b', c2:'#143422'},
+  {id:'dark-pink', name:'Dark — Pink', c1:'#2b1f27', c2:'#33232b'},
+  {id:'dark-silver', name:'Dark — Silver', c1:'#121417', c2:'#1a1c20'}
 ];
 
 function applyThemeId(id){
   try{
     const root = document.documentElement || document.body;
     if(window._currentThemeClass){ try{ root.classList.remove(window._currentThemeClass); }catch(e){} }
-    const cls = 'theme-' + String(id);
+    // accept either full class (starts with 'theme-') or id suffix
+    const cls = String(id).startsWith('theme-') ? String(id) : ('theme-' + String(id));
     try{ root.classList.add(cls); window._currentThemeClass = cls; }catch(e){}
     try{ localStorage.setItem(THEME_KEY, String(id)); }catch(e){}
   }catch(e){ console.warn('applyThemeId failed', e); }
