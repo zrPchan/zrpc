@@ -623,19 +623,33 @@ function render(){
     // build layers bottom-up
     const maxLayers = 10;
     const layers = [];
-    // color range (dark to light)
-    const colorDark = "#cdb88a";
-    const colorLight = "#efe6d1";
-    function hexToRgb(hex){
-      const h = hex.replace('#','');
-      return [parseInt(h.slice(0,2),16), parseInt(h.slice(2,4),16), parseInt(h.slice(4,6),16)];
+    // color range (dark to light) — read from theme CSS variables so themes control sand colors
+    const rootStyle = window.getComputedStyle(document.documentElement || document.body);
+    let colorDark = (rootStyle.getPropertyValue('--sand-2') || '').trim() || '#cdb88a';
+    let colorLight = (rootStyle.getPropertyValue('--sand-1') || '').trim() || '#efe6d1';
+    // helper: parse #rrggbb or rgb(r,g,b)
+    function parseColorToRgb(col){
+      if(!col) return [205,184,138];
+      col = col.trim();
+      if(col.startsWith('#')){
+        const h = col.replace('#','');
+        return [parseInt(h.slice(0,2),16), parseInt(h.slice(2,4),16), parseInt(h.slice(4,6),16)];
+      }
+      // rgb(...) or rgba(...)
+      const m = col.match(/rgb\s*\(([^)]+)\)/);
+      if(m && m[1]){
+        const parts = m[1].split(',').map(p=>parseInt(p.trim()));
+        return [parts[0]||0, parts[1]||0, parts[2]||0];
+      }
+      // fallback
+      return [205,184,138];
     }
     function rgbToHex(r,g,b){
       return "#"+[r,g,b].map(x=>x.toString(16).padStart(2,'0')).join('');
     }
     function lerp(a,b,t){ return Math.round(a + (b-a)*t); }
-    const darkRgb = hexToRgb(colorDark);
-    const lightRgb = hexToRgb(colorLight);
+    const darkRgb = parseColorToRgb(colorDark);
+    const lightRgb = parseColorToRgb(colorLight);
 
     // create full layers
     for(let i=0;i<fullLayers;i++){
