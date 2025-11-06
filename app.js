@@ -1090,18 +1090,18 @@ function changeLayer(delta){
   today.layerTotal = Math.max(0, (today.layerTotal||0) + delta);
   // keep bottlesToday and bottlesCum consistent for display
   today.bottlesToday = Math.floor((today.layerTotal||0) / BOTTLE_CAP);
-  today.bottlesCum = loadCumBase() + today.bottlesToday;
-  saveToday(today);
+  today.bottlesCum = storage.loadCumBase() + today.bottlesToday;
+  storage.saveToday(today);
   render(); renderLogs(); syncDebugDisplay();
 }
 
 function changeBottles(delta){
   // adjust cumulative bottles (affects level)
-  const base = loadCumBase();
+  const base = storage.loadCumBase();
   const newCum = Math.max(0, base + (today.bottlesToday||0) + delta);
   localStorage.setItem('cum_base', String(newCum - (today.bottlesToday||0)) );
   today.bottlesCum = newCum;
-  saveToday(today);
+  storage.saveToday(today);
   render(); renderLogs(); syncDebugDisplay();
 }
 
@@ -1114,10 +1114,10 @@ document.addEventListener('DOMContentLoaded', ()=>{
   const inc1 = document.getElementById('inc1'); if(inc1) inc1.addEventListener('click', ()=>changeLayer(1));
   const inc10 = document.getElementById('inc10'); if(inc10) inc10.addEventListener('click', ()=>changeLayer(10));
   const dec1 = document.getElementById('dec1'); if(dec1) dec1.addEventListener('click', ()=>changeLayer(-1));
-  const set0 = document.getElementById('set0'); if(set0) set0.addEventListener('click', ()=>{ today.layerTotal = 0; saveToday(today); render(); renderLogs(); syncDebugDisplay(); });
+  const set0 = document.getElementById('set0'); if(set0) set0.addEventListener('click', ()=>{ today.layerTotal = 0; storage.saveToday(today); render(); renderLogs(); syncDebugDisplay(); });
   const incBottle = document.getElementById('incBottle'); if(incBottle) incBottle.addEventListener('click', ()=>changeBottles(1));
   const decBottle = document.getElementById('decBottle'); if(decBottle) decBottle.addEventListener('click', ()=>changeBottles(-1));
-  const setLayerBtn = document.getElementById('setLayerBtn'); if(setLayerBtn){ setLayerBtn.addEventListener('click', ()=>{ const v = Number(document.getElementById('setLayerInput').value||0); today.layerTotal = Math.max(0, Math.floor(v)); today.bottlesToday = Math.floor(today.layerTotal / BOTTLE_CAP); today.bottlesCum = loadCumBase() + today.bottlesToday; saveToday(today); render(); renderLogs(); syncDebugDisplay(); }); }
+  const setLayerBtn = document.getElementById('setLayerBtn'); if(setLayerBtn){ setLayerBtn.addEventListener('click', ()=>{ const v = Number(document.getElementById('setLayerInput').value||0); today.layerTotal = Math.max(0, Math.floor(v)); today.bottlesToday = Math.floor(today.layerTotal / BOTTLE_CAP); today.bottlesCum = storage.loadCumBase() + today.bottlesToday; storage.saveToday(today); render(); renderLogs(); syncDebugDisplay(); }); }
   // initial sync
   syncDebugDisplay();
   // bind auto-save UI controls
