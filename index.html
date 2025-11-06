@@ -99,17 +99,19 @@
       <button id="upgradeBtn" type="button">Go Pro</button>
       <div id="proBadge">Free</div>
     </div>
-    <!-- Favorites popup (hidden by default) -->
-    <div id="favoritesPopup" class="favorites-popup" role="dialog" aria-modal="false" aria-hidden="true">
-      <div class="fav-header">お気に入り</div>
-      <div class="fav-body">
-        <div class="fav-add">
-          <input id="favMinutesInput" type="number" min="1" max="240" placeholder="分を入力" />
-          <button id="favAddBtn" type="button">追加</button>
+    <!-- Favorites popup (hidden by default) wrapped in an overlay to behave like a modal -->
+  <div id="favoritesOverlay" class="overlay" aria-hidden="true">
+      <div id="favoritesPopup" class="favorites-popup" role="dialog" aria-modal="true" aria-hidden="true">
+        <div class="fav-header">お気に入り</div>
+        <div class="fav-body">
+          <div class="fav-add">
+            <input id="favMinutesInput" type="number" min="1" max="240" placeholder="分を入力" />
+            <button id="favAddBtn" type="button">追加</button>
+          </div>
+          <div class="fav-list" id="favList" aria-live="polite"></div>
         </div>
-        <div class="fav-list" id="favList" aria-live="polite"></div>
+        <div class="fav-actions"><button id="favCloseBtn" type="button">閉じる</button></div>
       </div>
-      <div class="fav-actions"><button id="favCloseBtn" type="button">閉じる</button></div>
     </div>
     <!-- Auto-save settings: allow user to choose interval or turn off. -->
   <div id="autoSaveControls" class="text-center mt-8">

@@ -775,8 +775,39 @@ function renderFavList(){
   }).join('');
 }
 
-function openFavs(){ const p = document.getElementById('favoritesPopup'); if(!p) return; p.setAttribute('aria-hidden','false'); p.style.display = 'block'; renderFavList(); const inp = document.getElementById('favMinutesInput'); if(inp) inp.focus(); }
-function closeFavs(){ const p = document.getElementById('favoritesPopup'); if(!p) return; p.setAttribute('aria-hidden','true'); p.style.display = 'none'; }
+function openFavs(){
+  const overlay = document.getElementById('favoritesOverlay');
+  const popup = document.getElementById('favoritesPopup');
+  if(overlay && popup){
+    overlay.setAttribute('aria-hidden','false');
+    overlay.style.display = 'flex';
+    popup.setAttribute('aria-hidden','false');
+    renderFavList();
+    const inp = document.getElementById('favMinutesInput'); if(inp) try{ inp.focus(); }catch(e){}
+    // Bind overlay close (click outside) and Esc handler once
+    if(!window._favOverlayBound){
+      window._favOverlayBound = true;
+      try{ overlay.addEventListener('click', (ev)=>{ if(ev.target === overlay) closeFavs(); }); }catch(e){}
+      try{ document.addEventListener('keydown', (ev)=>{ if(ev.key === 'Escape'){ const ov = document.getElementById('favoritesOverlay'); if(ov && ov.style.display !== 'none'){ closeFavs(); } } }); }catch(e){}
+    }
+    return;
+  }
+  // fallback: previous behavior when overlay not present
+  const p = document.getElementById('favoritesPopup'); if(!p) return; p.setAttribute('aria-hidden','false'); p.style.display = 'block'; renderFavList(); const inp = document.getElementById('favMinutesInput'); if(inp) try{ inp.focus(); }catch(e){}
+}
+function closeFavs(){
+  const overlay = document.getElementById('favoritesOverlay');
+  const popup = document.getElementById('favoritesPopup');
+  if(overlay && popup){
+    overlay.setAttribute('aria-hidden','true');
+    overlay.style.display = 'none';
+    popup.setAttribute('aria-hidden','true');
+    // restore focus to open button
+    try{ const favOpen = document.getElementById('favOpenBtn'); if(favOpen && typeof favOpen.focus === 'function') favOpen.focus(); }catch(e){}
+    return;
+  }
+  const p = document.getElementById('favoritesPopup'); if(!p) return; p.setAttribute('aria-hidden','true'); p.style.display = 'none';
+}
 
 document.addEventListener('click', (ev)=>{
   // delegation for fav use/remove

@@ -163,7 +163,15 @@ button:disabled{opacity:0.5;cursor:not-allowed}
 .update-controls .btn-ghost{border-radius:8px;padding:6px 10px}
 
 /* Favorites popup */
-.favorites-popup{position:fixed;left:50%;top:22%;transform:translateX(-50%);background:var(--card);border-radius:12px;padding:12px;box-shadow:0 14px 40px rgba(34,20,35,0.12);width:320px;max-width:92%;z-index:500;display:none}
+.favorites-popup{
+  /* use overlay centering; don't use fixed positioning here */
+  position:relative;
+  background:var(--card);
+  border-radius:12px;
+  padding:12px;
+  box-shadow:0 14px 40px rgba(34,20,35,0.12);
+  width:320px;max-width:92%;z-index:500;display:block
+}
 .favorites-popup[aria-hidden="false"]{display:block}
 .favorites-popup .fav-header{font-weight:700;margin-bottom:8px;text-align:center}
 .favorites-popup .fav-body{display:flex;flex-direction:column;gap:8px}
