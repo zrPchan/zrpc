@@ -662,13 +662,13 @@ function render(){
   const color = rgbToHex(r,g,b);
   // create a set of small, randomly positioned dots to simulate grain (non-aligned)
   // stronger, denser dots and use multiply blending so layers darken when stacked
-  const dotAlpha = 0.38; // stronger opacity for darker grain
+  const dotAlpha = 0.55; // stronger opacity for darker grain (increased per user request)
   const dots = [];
   const dotCount = 60; // higher density per full layer
   for(let d=0; d<dotCount; d++){
     const px = Math.floor(Math.random()*100);
     const py = Math.floor(Math.random()*100);
-    const size = (Math.random()*0.8 + 0.6).toFixed(2); // ~0.6-1.4px
+  const size = (Math.random()*1.0 + 0.9).toFixed(2); // ~0.9-1.9px (slightly larger)
     dots.push(`radial-gradient(circle ${size}px at ${px}% ${py}%, rgba(${darkRgb[0]},${darkRgb[1]},${darkRgb[2]},${dotAlpha}) 0%, rgba(${darkRgb[0]},${darkRgb[1]},${darkRgb[2]},${dotAlpha}) 60%, transparent 61%)`);
   }
   const overlayStr = dots.join(',');
@@ -685,13 +685,13 @@ function render(){
       const g = lerp(darkRgb[1], lightRgb[1], t);
       const b = lerp(darkRgb[2], lightRgb[2], t);
       const color = rgbToHex(r,g,b);
-      const dotAlpha = 0.38;
+  const dotAlpha = 0.55;
       const dots = [];
       const dotCount = 30; // increased density for partial top layer as well
       for(let d=0; d<dotCount; d++){
         const px = Math.floor(Math.random()*100);
         const py = Math.floor(Math.random()*100);
-        const size = (Math.random()*0.8 + 0.6).toFixed(2);
+  const size = (Math.random()*1.0 + 0.9).toFixed(2);
         dots.push(`radial-gradient(circle ${size}px at ${px}% ${py}%, rgba(${darkRgb[0]},${darkRgb[1]},${darkRgb[2]},${dotAlpha}) 0%, rgba(${darkRgb[0]},${darkRgb[1]},${darkRgb[2]},${dotAlpha}) 60%, transparent 61%)`);
       }
       const overlayStr = dots.join(',');
