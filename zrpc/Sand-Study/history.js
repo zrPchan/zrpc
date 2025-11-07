@@ -25,33 +25,121 @@ function loadTasksForRange(start, end){
 }
 
 function aggregateHourly(entries){
-  // returns arrays length 24: avg mood, avg effort, counts
+  // returns arrays length 24: avg mood, avg effort, counts, plus heatmap frequency data
   const sumsMood = Array(24).fill(0);
   const sumsEff = Array(24).fill(0);
   const counts = Array(24).fill(0);
+  
+  // For heatmap: count frequency of each score per day-hour
+  const dailyHourlyMoodFreq = {}; // { "2025-11-08:14": {1:2, 2:0, 3:5, 4:1, 5:3} }
+  const dailyHourlyEffFreq = {};
+  
   for(const t of entries){
     const ts = (t.start || t.createdAt || Date.now()/1000) * 1000;
     const date = new Date(ts);
     const h = date.getHours();
-    if(typeof t.mood === 'number' || !isNaN(Number(t.mood))){ sumsMood[h] += Number(t.mood); }
-    if(typeof t.effort === 'number' || !isNaN(Number(t.effort))){ sumsEff[h] += Number(t.effort); }
+    const day = date.toISOString().slice(0,10);
+    const key = `${day}:${h}`;
+    
+    if(typeof t.mood === 'number' || !isNaN(Number(t.mood))){ 
+      const moodVal = Math.round(Number(t.mood));
+      sumsMood[h] += Number(t.mood);
+      if(!dailyHourlyMoodFreq[key]) dailyHourlyMoodFreq[key] = {};
+      dailyHourlyMoodFreq[key][moodVal] = (dailyHourlyMoodFreq[key][moodVal] || 0) + 1;
+    }
+    if(typeof t.effort === 'number' || !isNaN(Number(t.effort))){ 
+      const effVal = Math.round(Number(t.effort));
+      sumsEff[h] += Number(t.effort);
+      if(!dailyHourlyEffFreq[key]) dailyHourlyEffFreq[key] = {};
+      dailyHourlyEffFreq[key][effVal] = (dailyHourlyEffFreq[key][effVal] || 0) + 1;
+    }
     counts[h] += 1;
   }
   const avgMood = sumsMood.map((s,i)=> counts[i]? s/counts[i] : null);
   const avgEff = sumsEff.map((s,i)=> counts[i]? s/counts[i] : null);
-  return {avgMood, avgEff, counts};
+  return {avgMood, avgEff, counts, dailyHourlyMoodFreq, dailyHourlyEffFreq};
 }
 
-function renderChart(canvasId, label, data){
+function renderChart(canvasId, label, data, heatmapData, startDate, endDate){
   const canvas = document.getElementById(canvasId);
   if(!canvas){ console.warn('Canvas not found', canvasId); return; }
   const ctx = canvas.getContext('2d');
   if(window[canvasId+'Chart']){ try{ window[canvasId+'Chart'].destroy(); }catch(e){} }
-  // handle nulls by leaving gaps
+  
+  // Create heatmap data: x=hour (0-23), y=day, value=average
+  const days = dateRange(startDate, endDate);
+  const heatData = [];
+  
+  days.forEach((day, dayIndex) => {
+    for(let hour = 0; hour < 24; hour++){
+      const key = `${day}:${hour}`;
+      const values = heatmapData[key];
+      if(values && values.length > 0){
+        const avg = values.reduce((a,b)=>a+b,0) / values.length;
+        heatData.push({
+          x: hour,
+          y: dayIndex,
+          v: avg.toFixed(2)
+        });
+      }
+    }
+  });
+  
+  // Color scale: low (blue) -> high (red)
+  const getColor = (value) => {
+    if(!value) return 'rgba(200,200,200,0.1)';
+    const v = parseFloat(value);
+    // Assuming scale 1-5
+    const ratio = (v - 1) / 4; // normalize to 0-1
+    const hue = (1 - ratio) * 240; // 240=blue, 0=red
+    return `hsla(${hue}, 70%, 50%, 0.7)`;
+  };
+  
   window[canvasId+'Chart'] = new Chart(ctx, {
-    type: 'line',
-    data: { labels: Array.from({length:24},(_,i)=> `${i}:00`), datasets:[{ label, data, borderColor:'#3b82f6', backgroundColor:'rgba(59,130,246,0.08)', spanGaps:true, tension:0.2 }] },
-    options: { scales:{ y:{ beginAtZero:false } }, plugins:{ legend:{ display:true } } }
+    type: 'bubble',
+    data: {
+      datasets: [{
+        label: label,
+        data: heatData.map(d => ({
+          x: d.x,
+          y: d.y,
+          r: 15, // bubble radius
+          value: d.v
+        })),
+        backgroundColor: heatData.map(d => getColor(d.v)),
+        borderColor: 'rgba(0,0,0,0.2)',
+        borderWidth: 1
+      }]
+    },
+    options: {
+      scales: {
+        x: {
+          type: 'linear',
+          min: 0,
+          max: 23,
+          ticks: { stepSize: 1, callback: (v) => `${v}:00` },
+          title: { display: true, text: '時刻' }
+        },
+        y: {
+          type: 'linear',
+          min: -0.5,
+          max: days.length - 0.5,
+          ticks: { stepSize: 1, callback: (v) => days[Math.floor(v)] || '' },
+          title: { display: true, text: '日付' }
+        }
+      },
+      plugins: {
+        legend: { display: true },
+        tooltip: {
+          callbacks: {
+            label: (ctx) => {
+              const point = ctx.raw;
+              return `${label}: ${point.value} (${point.x}:00, ${days[point.y]})`;
+            }
+          }
+        }
+      }
+    }
   });
 }
 
@@ -108,8 +196,8 @@ document.addEventListener('DOMContentLoaded', ()=>{
       return;
     }
     const agg = aggregateHourly(entries);
-    renderChart('moodChart','平均 mood', agg.avgMood.map(v=> v===null? null: Number(v.toFixed(2))));
-    renderChart('effortChart','平均 effort', agg.avgEff.map(v=> v===null? null: Number(v.toFixed(2))));
+    renderChart('moodChart','平均 mood', agg.avgMood.map(v=> v===null? null: Number(v.toFixed(2))), agg.dailyHourlyMood, s, e);
+    renderChart('effortChart','平均 effort', agg.avgEff.map(v=> v===null? null: Number(v.toFixed(2))), agg.dailyHourlyEff, s, e);
     renderBottleList(s,e);
     // attach csv export
     document.getElementById('exportCsv').onclick = ()=> exportCsv(entries);
