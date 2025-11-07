@@ -7,9 +7,10 @@ function getResponsiveCanvasSize(){
   
   // グリッドは24時間×5段階 = 24:5の比率
   // 正方形セルにするため、パディングを考慮して高さを計算
-  // パディング左140 + 右140 = 280px、上120 + 下120 = 240px
   const scale = containerWidth / 1800;
-  const paddingH = Math.floor((140 + 140) * scale); // 左右合計（対称）
+  const yAxisLabelSpace = Math.floor(90 * scale);
+  const visualPadding = Math.floor(50 * scale);
+  const paddingH = (yAxisLabelSpace + visualPadding) * 2; // 左右合計（対称）
   const paddingV = Math.floor((120 + 120) * scale); // 上下合計
   const gridWidth = containerWidth - paddingH;
   const gridHeight = gridWidth * 5 / 24; // 正方形セルにするための高さ
@@ -228,13 +229,14 @@ function renderChart(canvasId, label, freqData, startDate, endDate){
     ctx.fillText(`${h}時`, x, canvas.height - paddingBottom + paddingBottom * 0.2);
   }
   
-  // Draw Y-axis labels (scores)
+  // Draw Y-axis labels (scores) - yAxisLabelSpace内に配置
   ctx.font = `${fontSize.yAxisLabel}px sans-serif`;
   ctx.textAlign = 'right';
   ctx.textBaseline = 'middle';
   for(let s = 1; s <= 5; s++){
     const y = paddingTop + (5 - s) * cellHeight + cellHeight / 2;
-    ctx.fillText(`${s}点`, paddingLeft - paddingLeft * 0.15, y);
+    // Y軸ラベルをグリッドの左側、yAxisLabelSpace内に配置
+    ctx.fillText(`${s}点`, yAxisLabelSpace + visualPadding * 0.7, y);
   }
   
   // Draw axis titles
@@ -243,9 +245,9 @@ function renderChart(canvasId, label, freqData, startDate, endDate){
   ctx.textAlign = 'center';
   ctx.fillText('時刻', canvas.width / 2, canvas.height - paddingBottom * 0.3);
   
-  // Y-axis title (rotated) - 左端に配置、Y軸ラベルと重ならないように
+  // Y-axis title (rotated) - yAxisLabelSpaceの中央に配置
   ctx.save();
-  ctx.translate(paddingLeft * 0.25, canvas.height / 2);
+  ctx.translate(yAxisLabelSpace * 0.3, canvas.height / 2);
   ctx.rotate(-Math.PI / 2);
   ctx.textAlign = 'center';
   ctx.fillText('評価値', 0, 0);
