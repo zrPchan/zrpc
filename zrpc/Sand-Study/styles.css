@@ -364,8 +364,9 @@ button:disabled{opacity:0.5;cursor:not-allowed}
 #charts canvas{
   display: block;
   margin: 0 auto;
+  width: 1800px;
+  height: 600px;
   max-width: 100%;
-  height: auto;
   border: 1px solid rgba(0, 0, 0, 0.1);
   border-radius: 8px;
   background: white;
