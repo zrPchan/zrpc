@@ -64,17 +64,6 @@ function renderChart(canvasId, label, freqData, startDate, endDate){
   const canvas = document.getElementById(canvasId);
   if(!canvas){ console.warn('Canvas not found', canvasId); return; }
   
-  // Destroy existing chart properly
-  const chartKey = canvasId + 'Chart';
-  if(window[chartKey]){
-    try{
-      window[chartKey].destroy();
-      window[chartKey] = null;
-    }catch(e){
-      console.warn('Error destroying chart:', e);
-    }
-  }
-  
   const ctx = canvas.getContext('2d');
   
   // Validate freqData
@@ -82,6 +71,9 @@ function renderChart(canvasId, label, freqData, startDate, endDate){
     console.error('Invalid freqData:', freqData);
     return;
   }
+  
+  // Clear canvas
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
   
   // Aggregate all days into hourly frequency map (overlapping all dates)
   const hourlyFreq = Array(24).fill(null).map(() => ({})); // [{1:0, 2:0, 3:0, 4:0, 5:0}, ...]
@@ -97,44 +89,28 @@ function renderChart(canvasId, label, freqData, startDate, endDate){
     }
   });
   
-  // Calculate total count per hour and deviation score (偏差値)
-  const heatData = [];
+  // Calculate statistics for deviation score
   const allCounts = [];
-  
-  // First pass: collect all counts for mean/stddev calculation
   for(let hour = 0; hour < 24; hour++){
     const scores = hourlyFreq[hour];
     Object.values(scores).forEach(count => allCounts.push(count));
   }
   
-  // Calculate mean and standard deviation
   const mean = allCounts.length > 0 ? allCounts.reduce((a,b)=>a+b,0) / allCounts.length : 0;
   const variance = allCounts.length > 0 ? allCounts.reduce((a,b)=>a+Math.pow(b-mean,2),0) / allCounts.length : 1;
   const stdDev = Math.sqrt(variance);
   
-  // Create heatmap matrix data
-  const matrixData = [];
-  for(let hour = 0; hour < 24; hour++){
-    const scores = hourlyFreq[hour];
-    
-    // For each score value (1-5), calculate frequency and deviation
-    for(let scoreVal = 1; scoreVal <= 5; scoreVal++){
-      const count = scores[scoreVal] || 0;
-      // Calculate deviation score (偏差値): 50 + 10 * (x - mean) / stdDev
-      const deviation = count > 0 && stdDev > 0 ? 50 + 10 * (count - mean) / stdDev : (count > 0 ? 50 : 0);
-      
-      matrixData.push({
-        x: hour,
-        y: scoreVal,
-        v: Math.max(0, Math.min(100, deviation)) // deviation value (0-100)
-      });
-    }
-  }
+  // Canvas dimensions and layout
+  const padding = 60;
+  const gridWidth = canvas.width - padding * 2;
+  const gridHeight = canvas.height - padding * 2;
+  const cellWidth = gridWidth / 24;
+  const cellHeight = gridHeight / 5;
   
-  // Color scale based on deviation score (heatmap gradient)
+  // Color scale based on deviation score
   const getColor = (deviation) => {
     if(deviation === 0) return 'rgba(240, 240, 240, 0.3)'; // no data
-    // Gradient: blue (low) -> cyan -> green -> yellow -> orange -> red (high)
+    // Gradient: blue (low) -> green -> yellow -> orange -> red (high)
     const colors = [
       { dev: 0, rgb: [59, 130, 246] },    // blue
       { dev: 30, rgb: [34, 197, 94] },    // green
@@ -143,7 +119,6 @@ function renderChart(canvasId, label, freqData, startDate, endDate){
       { dev: 100, rgb: [239, 68, 68] }    // red
     ];
     
-    // Find interpolation range
     for(let i = 0; i < colors.length - 1; i++){
       if(deviation >= colors[i].dev && deviation <= colors[i+1].dev){
         const t = (deviation - colors[i].dev) / (colors[i+1].dev - colors[i].dev);
@@ -153,81 +128,76 @@ function renderChart(canvasId, label, freqData, startDate, endDate){
         return `rgba(${r}, ${g}, ${b}, 0.85)`;
       }
     }
-    return 'rgba(239, 68, 68, 0.85)'; // fallback red
+    return 'rgba(239, 68, 68, 0.85)';
   };
   
-  window[canvasId+'Chart'] = new Chart(ctx, {
-    type: 'matrix',
-    data: {
-      datasets: [{
-        label: label,
-        data: matrixData,
-        backgroundColor: (context) => {
-          const value = context.dataset.data[context.dataIndex];
-          return value ? getColor(value.v) : 'rgba(240,240,240,0.3)';
-        },
-        borderColor: 'rgba(200, 200, 200, 0.3)',
-        borderWidth: 1,
-        width: ({chart}) => (chart.chartArea || {}).width / 24 * 0.95,
-        height: ({chart}) => (chart.chartArea || {}).height / 5 * 0.95
-      }]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: true,
-      aspectRatio: 3,
-      scales: {
-        x: {
-          type: 'linear',
-          min: -0.5,
-          max: 23.5,
-          offset: false,
-          ticks: { 
-            stepSize: 2,
-            callback: (v) => Number.isInteger(v) && v >= 0 && v <= 23 ? `${v}時` : '',
-            font: { size: 11 }
-          },
-          title: { display: true, text: '時刻', font: { size: 14, weight: 'bold' } },
-          grid: { display: false }
-        },
-        y: {
-          type: 'linear',
-          min: 0.5,
-          max: 5.5,
-          offset: false,
-          ticks: { 
-            stepSize: 1,
-            callback: (v) => Number.isInteger(v) && v >= 1 && v <= 5 ? `${v}点` : '',
-            font: { size: 11 }
-          },
-          title: { display: true, text: '評価値', font: { size: 14, weight: 'bold' } },
-          grid: { display: false }
-        }
-      },
-      plugins: {
-        legend: { 
-          display: true,
-          labels: { font: { size: 12 } }
-        },
-        tooltip: {
-          callbacks: {
-            title: () => '',
-            label: (ctx) => {
-              const value = ctx.dataset.data[ctx.dataIndex];
-              const hour = value.x;
-              const score = value.y;
-              const dev = value.v.toFixed(1);
-              return [
-                `時刻: ${hour}:00`,
-                `評価値: ${score}点`,
-                `偏差値: ${dev}`
-              ];
-            }
-          }
-        }
+  // Draw title
+  ctx.fillStyle = '#1f2937';
+  ctx.font = 'bold 16px sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillText(label + ' ヒートマップ', canvas.width / 2, 30);
+  
+  // Draw heatmap cells
+  for(let hour = 0; hour < 24; hour++){
+    const scores = hourlyFreq[hour];
+    
+    for(let scoreVal = 1; scoreVal <= 5; scoreVal++){
+      const count = scores[scoreVal] || 0;
+      const deviation = count > 0 && stdDev > 0 ? 50 + 10 * (count - mean) / stdDev : (count > 0 ? 50 : 0);
+      const clampedDev = Math.max(0, Math.min(100, deviation));
+      
+      const x = padding + hour * cellWidth;
+      const y = padding + (5 - scoreVal) * cellHeight; // invert Y axis (5 at top, 1 at bottom)
+      
+      ctx.fillStyle = getColor(clampedDev);
+      ctx.fillRect(x, y, cellWidth - 1, cellHeight - 1);
+      
+      // Draw border
+      ctx.strokeStyle = 'rgba(200, 200, 200, 0.3)';
+      ctx.lineWidth = 0.5;
+      ctx.strokeRect(x, y, cellWidth - 1, cellHeight - 1);
+      
+      // Draw count text if significant
+      if(count > 0 && cellWidth > 20){
+        ctx.fillStyle = clampedDev > 60 ? 'white' : '#374151';
+        ctx.font = '10px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(count.toString(), x + cellWidth / 2, y + cellHeight / 2);
       }
     }
-  });
+  }
+  
+  // Draw X-axis labels (hours)
+  ctx.fillStyle = '#6b7280';
+  ctx.font = '11px sans-serif';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'top';
+  for(let h = 0; h <= 23; h += 2){
+    const x = padding + h * cellWidth + cellWidth / 2;
+    ctx.fillText(`${h}時`, x, canvas.height - padding + 10);
+  }
+  
+  // Draw Y-axis labels (scores)
+  ctx.textAlign = 'right';
+  ctx.textBaseline = 'middle';
+  for(let s = 1; s <= 5; s++){
+    const y = padding + (5 - s) * cellHeight + cellHeight / 2;
+    ctx.fillText(`${s}点`, padding - 10, y);
+  }
+  
+  // Draw axis titles
+  ctx.font = 'bold 12px sans-serif';
+  ctx.fillStyle = '#374151';
+  ctx.textAlign = 'center';
+  ctx.fillText('時刻', canvas.width / 2, canvas.height - 15);
+  
+  ctx.save();
+  ctx.translate(15, canvas.height / 2);
+  ctx.rotate(-Math.PI / 2);
+  ctx.textAlign = 'center';
+  ctx.fillText('評価値', 0, 0);
+  ctx.restore();
 }
 
 function renderBottleList(start,end){
