@@ -3,3 +3,10 @@
 .vercel
 
 node_modules/
+
+# Security: Do not commit private keys
+**/vapid.json
+**/*.pem
+**/*.key
+.env
+.env.*
