@@ -3,61 +3,222 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>zrPchan - Developer Portfolio</title>
+    <title>zrPchan — Developer Portfolio</title>
     <style>
         :root{
-            --bg-1: #f6f8ff;
-            --bg-2: #fffaf6;
-            --card:#ffffff;
-            --accent:#ff6b81;
-            --muted:#6b7280;
-            --glass: rgba(255,255,255,0.6);
+            --bg-start: #0f172a;
+            --bg-end: #1e293b;
+            --card: rgba(30, 41, 59, 0.5);
+            --card-hover: rgba(51, 65, 85, 0.6);
+            --accent: #3b82f6;
+            --accent-bright: #60a5fa;
+            --text: #f1f5f9;
+            --text-muted: #94a3b8;
+            --border: rgba(148, 163, 184, 0.1);
         }
-        *{box-sizing:border-box}
-        body{font-family:Inter,ui-sans-serif,system-ui,-apple-system,'Segoe UI',Roboto,'Hiragino Kaku Gothic ProN',Meiryo,Arial,sans-serif;margin:0;background:linear-gradient(180deg,var(--bg-1) 0%,var(--bg-2) 100%);color:#111;min-height:100vh;}
-        main{max-width:980px;margin:48px auto;padding:28px}
-        header{text-align:center;padding:28px 12px}
-        h1{margin:.2rem 0;font-size:2rem;letter-spacing:-0.5px;color:#111}
-        .subtitle{color:var(--muted);margin-top:6px;font-size:0.95rem}
-        .project{margin:22px 0;padding:18px;border-radius:14px;background:linear-gradient(180deg,var(--card),#fbfbff);box-shadow:0 6px 18px rgba(16,24,40,0.06);border:1px solid rgba(16,24,40,0.04)}
-        .project h2{margin:0 0 8px;font-size:1.25rem}
-        p.lead{color:var(--muted);margin-top:0}
-        a.button{display:inline-block;padding:10px 14px;border-radius:999px;background:linear-gradient(90deg,var(--accent),#ff8aa2);color:white;text-decoration:none;font-weight:600;box-shadow:0 6px 18px rgba(255,107,129,0.18);transition:transform .12s ease,box-shadow .12s}
-        a.button:hover{transform:translateY(-3px);box-shadow:0 12px 30px rgba(255,107,129,0.18)}
-        a{color:var(--accent)}
-        .coming-soon{opacity:0.95;}
-        .coming-soon ul{margin:0.5rem 0 0 1.25rem;color:var(--muted)}
-        footer{margin-top:50px;color:var(--muted);font-size:0.95rem;text-align:center;padding:28px 12px}
-        @media (max-width:600px){
-            main{padding:18px;margin:24px auto}
-            h1{font-size:1.6rem}
-            .project{padding:14px;border-radius:12px}
-            a.button{padding:9px 12px}
+        *{box-sizing:border-box;margin:0;padding:0}
+        body{
+            font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,'Noto Sans',sans-serif,'Apple Color Emoji','Segoe UI Emoji';
+            background:linear-gradient(135deg,var(--bg-start) 0%,var(--bg-end) 100%);
+            color:var(--text);
+            min-height:100vh;
+            display:flex;
+            flex-direction:column;
+            position:relative;
+            overflow-x:hidden;
+        }
+        body::before{
+            content:'';
+            position:fixed;
+            top:0;
+            left:0;
+            width:100%;
+            height:100%;
+            background:radial-gradient(circle at 20% 50%, rgba(59,130,246,0.1) 0%, transparent 50%),
+                       radial-gradient(circle at 80% 80%, rgba(168,85,247,0.08) 0%, transparent 50%);
+            pointer-events:none;
+            z-index:0;
+        }
+        main{max-width:900px;margin:0 auto;padding:80px 24px 40px;position:relative;z-index:1}
+        header{text-align:center;margin-bottom:60px}
+        h1{
+            font-size:3.5rem;
+            font-weight:800;
+            background:linear-gradient(135deg,var(--accent-bright),var(--accent));
+            -webkit-background-clip:text;
+            background-clip:text;
+            -webkit-text-fill-color:transparent;
+            margin-bottom:12px;
+            letter-spacing:-0.03em;
+        }
+        .subtitle{
+            color:var(--text-muted);
+            font-size:1.1rem;
+            font-weight:400;
+            letter-spacing:0.02em;
+        }
+        .lead{
+            text-align:center;
+            color:var(--text-muted);
+            font-size:1.05rem;
+            line-height:1.7;
+            margin:40px auto;
+            max-width:600px;
+        }
+        .projects{display:grid;gap:24px;margin-top:48px}
+        .project{
+            background:var(--card);
+            backdrop-filter:blur(10px);
+            border:1px solid var(--border);
+            border-radius:16px;
+            padding:32px;
+            transition:all 0.3s cubic-bezier(0.4,0,0.2,1);
+            position:relative;
+            overflow:hidden;
+        }
+        .project::before{
+            content:'';
+            position:absolute;
+            top:0;
+            left:0;
+            width:100%;
+            height:2px;
+            background:linear-gradient(90deg,var(--accent),var(--accent-bright));
+            opacity:0;
+            transition:opacity 0.3s;
+        }
+        .project:hover{
+            background:var(--card-hover);
+            border-color:rgba(148,163,184,0.2);
+            transform:translateY(-4px);
+        }
+        .project:hover::before{opacity:1}
+        .project h2{
+            font-size:1.75rem;
+            font-weight:700;
+            margin-bottom:12px;
+            color:var(--text);
+        }
+        .project p{
+            color:var(--text-muted);
+            line-height:1.7;
+            margin-bottom:20px;
+        }
+        .project .tags{
+            display:flex;
+            gap:8px;
+            flex-wrap:wrap;
+            margin-bottom:20px;
+        }
+        .tag{
+            background:rgba(59,130,246,0.15);
+            color:var(--accent-bright);
+            padding:4px 12px;
+            border-radius:6px;
+            font-size:0.85rem;
+            font-weight:500;
+        }
+        a.button{
+            display:inline-flex;
+            align-items:center;
+            gap:8px;
+            padding:12px 24px;
+            border-radius:10px;
+            background:linear-gradient(135deg,var(--accent),var(--accent-bright));
+            color:white;
+            text-decoration:none;
+            font-weight:600;
+            font-size:0.95rem;
+            transition:all 0.3s;
+            box-shadow:0 4px 12px rgba(59,130,246,0.3);
+        }
+        a.button:hover{
+            transform:translateY(-2px);
+            box-shadow:0 8px 24px rgba(59,130,246,0.4);
+        }
+        a.button::after{
+            content:'→';
+            transition:transform 0.3s;
+        }
+        a.button:hover::after{
+            transform:translateX(4px);
+        }
+        .coming-soon{opacity:0.7}
+        .coming-soon h2{color:var(--text-muted)}
+        .coming-soon ul{
+            list-style:none;
+            padding:0;
+        }
+        .coming-soon li{
+            padding:8px 0;
+            color:var(--text-muted);
+            display:flex;
+            align-items:center;
+            gap:12px;
+        }
+        .coming-soon li::before{
+            content:'⏱';
+            font-size:1.2rem;
+        }
+        footer{
+            margin-top:auto;
+            padding:40px 24px;
+            text-align:center;
+            color:var(--text-muted);
+            font-size:0.9rem;
+            position:relative;
+            z-index:1;
+        }
+        footer a{
+            color:var(--accent-bright);
+            text-decoration:none;
+            transition:color 0.2s;
+        }
+        footer a:hover{
+            color:var(--accent);
+        }
+        @media (max-width:768px){
+            h1{font-size:2.5rem}
+            main{padding:60px 20px 32px}
+            .project{padding:24px}
+            .lead{font-size:1rem}
         }
     </style>
 </head>
 <body>
-    <h1>zrPchan's Projects</h1>
-    <p class="subtitle">Developer / Maker — small projects and experiments</p>
-    <p class="lead">Welcome to my developer portfolio! Below are some public projects. その他は順次公開予定です。</p>
-    
-    <div class="project">
-        <h2>Sand Study</h2>
-        <p>A focused work timer application with visual sand bottle progress tracking.</p>
-    <p><a class="button" href="./Sand-Study/" target="_blank" rel="noopener">Visit Sand Study</a></p>
-    </div>
+    <main>
+        <header>
+            <h1>zrPchan</h1>
+            <p class="subtitle">Developer • Maker • Creator</p>
+        </header>
 
-    <div class="project coming-soon">
-        <h2>Coming Soon</h2>
-        <p>以下のプロジェクトは現在準備中です。</p>
-        <ul>
-            <li>Squash — Coming soon</li>
-            <li>Shooting — Coming soon</li>
-        </ul>
-    </div>
+        <p class="lead">Welcome to my digital workspace. Here you'll find my projects, experiments, and creative explorations in software development.</p>
+        
+        <div class="projects">
+            <div class="project">
+                <h2>Sand Study</h2>
+                <div class="tags">
+                    <span class="tag">PWA</span>
+                    <span class="tag">Productivity</span>
+                    <span class="tag">Timer</span>
+                </div>
+                <p>A minimalist Pomodoro-style timer with beautiful sand bottle visualization. Track your focused work sessions and build productive habits.</p>
+                <a class="button" href="./Sand-Study/" rel="noopener">Launch App</a>
+            </div>
+
+            <div class="project coming-soon">
+                <h2>Coming Soon</h2>
+                <p>Currently in development:</p>
+                <ul>
+                    <li>Squash — Interactive game project</li>
+                    <li>Shooting — Action game prototype</li>
+                </ul>
+            </div>
+        </div>
+    </main>
 
     <footer>
-        <p>© 2025 zrPchan | <a href="https://github.com/zrPchan" target="_blank" rel="noopener">GitHub</a></p>
+        <p>© 2025 zrPchan • <a href="https://github.com/zrPchan" target="_blank" rel="noopener">GitHub</a></p>
     </footer>
 </body>
 </html>
