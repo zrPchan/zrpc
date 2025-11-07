@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>ヒートマップ中央配置テスト</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 20px;
+      background: #f5f5f5;
+      font-family: sans-serif;
+    }
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    h1 {
+      text-align: center;
+      color: #333;
+    }
+    .canvas-wrapper {
+      /* 中央配置のための明示的なスタイル */
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin: 20px 0;
+      background: #fafafa;
+      padding: 20px;
+      border: 2px dashed #ddd;
+    }
+    canvas {
+      display: block;
+      border: 1px solid #333;
+      background: white;
+    }
+    .info {
+      margin: 20px 0;
+      padding: 15px;
+      background: #e3f2fd;
+      border-left: 4px solid #2196f3;
+    }
+    .debug-info {
+      font-family: monospace;
+      font-size: 14px;
+      margin-top: 10px;
+      padding: 10px;
+      background: #f5f5f5;
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🎯 ヒートマップ中央配置テスト</h1>
+    
+    <div class="info">
+      <strong>目的:</strong> グリッドが完全に中央配置されているか確認<br>
+      <strong>確認ポイント:</strong> 
+      <ul>
+        <li>グリッドの左右に同じ幅の余白があるか</li>
+        <li>Y軸ラベルが左側の余白内に収まっているか</li>
+        <li>「評価値」タイトルが見えるか</li>
+      </ul>
+    </div>
+
+    <div class="history-controls text-center mt-8">
+      <label>開始日 <input id="startDate" type="date"></label>
+      <label>終了日 <input id="endDate" type="date"></label>
+      <button id="drawBtn" type="button">描画</button>
+      <button id="exportCsv" type="button">CSV エクスポート</button>
+    </div>
+
+    <!-- デバッグ用ログ追加 -->
+    <details class="debug-panel text-center mt-8">
+      <summary>🛠️ デバッグ: ログ手動追加</summary>
+      <div class="grid-row">
+        <div class="row">
+          <label>日付:</label>
+          <input id="debugDate" type="date">
+        </div>
+        <div class="row">
+          <label>時刻:</label>
+          <input id="debugTime" type="time" value="12:00">
+        </div>
+        <div class="row">
+          <label>M値 (1-5):</label>
+          <input id="debugM" type="number" min="1" max="5" value="3">
+        </div>
+        <div class="row">
+          <label>E値 (1-5):</label>
+          <input id="debugE" type="number" min="1" max="5" value="3">
+        </div>
+        <div class="row">
+          <label>レイヤー数:</label>
+          <input id="debugLayer" type="number" min="0" value="1">
+        </div>
+        <div style="text-align:center;margin-top:6px;">
+          <button id="addDebugLog" type="button">ログ追加</button>
+        </div>
+        <div id="debugStatus"></div>
+      </div>
+    </details>
+
+    <div class="canvas-wrapper">
+        <section id="charts" class="container-heatmap">
+          <canvas id="moodChart"></canvas>
+          <canvas id="effortChart" class="mt-16"></canvas>
+        </section>
+      </div>
+
+      <div class="debug-info" id="debugInfo">
+        <p>ここはテスト用の履歴ページです。下のフォームでログを追加し、グラフが更新されることを確認してください。</p>
+      </div>
+    </div>
+
+    <!-- Reuse shared history rendering logic -->
+    <script type="module" src="history.js?v=28"></script>
+  </body>
+  </html>

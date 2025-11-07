@@ -398,6 +398,20 @@ button:disabled{opacity:0.5;cursor:not-allowed}
 #proBadge{margin-left:8px;font-weight:600;color:var(--muted)}
 
 /* Logs header */
+
+/* History controls (date range, draw, export) */
+.history-controls{display:flex;gap:10px;justify-content:center;align-items:center;flex-wrap:wrap;margin-top:12px}
+.history-controls label{font-size:14px}
+.history-controls input[type="date"], .history-controls input[type="time"], .history-controls input[type="number"]{padding:6px 8px;border:1px solid var(--border);border-radius:6px}
+.history-controls button{padding:8px 12px;border-radius:8px}
+
+/* Inline debug panel fallback styles moved here to satisfy linter */
+.debug-panel{max-width:640px;margin:20px auto;padding:12px;border-radius:8px;background:rgba(59,130,246,0.06)}
+.debug-panel summary{cursor:pointer;font-weight:700;color:#3b82f6}
+.debug-panel .grid-row{margin-top:12px;display:grid;gap:10px}
+.debug-panel .grid-row .row{display:grid;grid-template-columns:120px 1fr;gap:8px;align-items:center}
+.debug-panel #addDebugLog{padding:8px 14px;background:#3b82f6;color:white;border:none;border-radius:6px}
+.debug-panel #debugStatus{margin-top:6px;color:#666}
 #logs h4{text-align:center;margin-top:8px}
 
 /* Truncate warning actions (used in modal) */
