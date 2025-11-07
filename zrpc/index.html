@@ -65,6 +65,35 @@
             margin:40px auto;
             max-width:600px;
         }
+        .about{
+            background:var(--card);
+            backdrop-filter:blur(10px);
+            border:1px solid var(--border);
+            border-radius:16px;
+            padding:32px;
+            margin:0 auto 40px;
+            max-width:700px;
+        }
+        .about h2{
+            font-size:1.5rem;
+            margin-bottom:16px;
+            background:linear-gradient(135deg,var(--accent-bright),var(--accent));
+            -webkit-background-clip:text;
+            background-clip:text;
+            -webkit-text-fill-color:transparent;
+        }
+        .about h3{
+            font-size:1.1rem;
+            margin:24px 0 12px;
+            color:var(--text);
+        }
+        .about p{
+            color:var(--text-muted);
+            line-height:1.7;
+        }
+        .tech-stack{
+            margin-top:20px;
+        }
         .projects{display:grid;gap:24px;margin-top:48px}
         .project{
             background:var(--card);
@@ -191,6 +220,21 @@
             <h1>zrPchan</h1>
             <p class="subtitle">Developer • Maker • Creator</p>
         </header>
+
+        <section class="about">
+            <h2>About Me</h2>
+            <p>Web developer passionate about creating interactive applications and user-friendly tools. I focus on building Progressive Web Apps (PWAs) and productivity tools that enhance daily workflows.</p>
+            <div class="tech-stack">
+                <h3>Tech Stack</h3>
+                <div class="tags">
+                    <span class="tag">JavaScript</span>
+                    <span class="tag">HTML/CSS</span>
+                    <span class="tag">PWA</span>
+                    <span class="tag">Service Workers</span>
+                    <span class="tag">Git</span>
+                </div>
+            </div>
+        </section>
 
         <p class="lead">Welcome to my digital workspace. Here you'll find my projects, experiments, and creative explorations in software development.</p>
         
