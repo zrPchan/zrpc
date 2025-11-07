@@ -63,8 +63,19 @@ function aggregateHourly(entries){
 function renderChart(canvasId, label, freqData, startDate, endDate){
   const canvas = document.getElementById(canvasId);
   if(!canvas){ console.warn('Canvas not found', canvasId); return; }
+  
+  // Destroy existing chart properly
+  const chartKey = canvasId + 'Chart';
+  if(window[chartKey]){
+    try{
+      window[chartKey].destroy();
+      window[chartKey] = null;
+    }catch(e){
+      console.warn('Error destroying chart:', e);
+    }
+  }
+  
   const ctx = canvas.getContext('2d');
-  if(window[canvasId+'Chart']){ try{ window[canvasId+'Chart'].destroy(); }catch(e){} }
   
   // Validate freqData
   if(!freqData || typeof freqData !== 'object'){

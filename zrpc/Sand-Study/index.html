@@ -152,38 +152,74 @@
 
   <!-- Debug controls for adjusting sand/bottles -->
   <section id="debugPanel" aria-label="デバッグパネル">
-    <div class="debug-header">
-      <strong>デバッグ</strong>
-      <div id="debugLayerDisplay">Layer: 0</div>
-    </div>
-    <div class="debug-controls">
-      <button id="inc1" type="button">+1 layer</button>
-      <button id="inc10" type="button">+10 layer</button>
-      <button id="dec1" type="button">-1 layer</button>
-      <button id="set0" type="button">Reset layer</button>
-      <button id="incBottle" type="button">+1 bottle</button>
-      <button id="decBottle" type="button">-1 bottle</button>
-    </div>
-    <div class="debug-row">
-      <input id="setLayerInput" type="number" placeholder="layer" />
-      <button id="setLayerBtn" type="button">Set</button>
-    </div>
-    <div class="debug-row">
-      <button id="enableSEBtn" type="button">Enable SE (dev)</button>
-      <div class="hint">(開発用: ブラウザの自動再生制限を回避するためクリックで有効化)</div>
-    </div>
-    <div class="debug-row">
-      <button id="soundTestBtn" type="button">音テスト</button>
-      <button id="notifyTestBtn" type="button">通知テスト</button>
-      <button id="pushSubscribeBtn" type="button">Push 登録</button>
-      <button id="pushUnsubscribeBtn" type="button">Push 解除</button>
-      <button id="iosHelpBtn" type="button">iOS 手順</button>
-    </div>
-    <div class="debug-row">
-  <div>Push 状態: <span id="pushStatus">未確認</span></div>
-  <div>VAPID 公開鍵: <code id="vapidKey" class="code-inline"></code></div>
-  <div>登録エンドポイント: <code id="pushEndpoint" class="code-inline"></code></div>
-    </div>
+    <details class="debug-toggle">
+      <summary class="debug-summary">
+        <span class="debug-icon">🛠️</span>
+        <span class="debug-title">デバッグパネル</span>
+        <span class="debug-layer-badge" id="debugLayerBadge">Layer: 0</span>
+      </summary>
+      
+      <div class="debug-content">
+        <!-- Layer Controls -->
+        <div class="debug-section">
+          <div class="debug-section-title">レイヤー調整</div>
+          <div class="debug-grid">
+            <button id="inc1" type="button" class="debug-btn primary">+1 layer</button>
+            <button id="inc10" type="button" class="debug-btn primary">+10 layer</button>
+            <button id="dec1" type="button" class="debug-btn danger">-1 layer</button>
+            <button id="set0" type="button" class="debug-btn warning">Reset layer</button>
+          </div>
+          <div class="debug-input-row">
+            <input id="setLayerInput" type="number" placeholder="Layer値を入力" class="debug-input" />
+            <button id="setLayerBtn" type="button" class="debug-btn">Set</button>
+          </div>
+        </div>
+        
+        <!-- Bottle Controls -->
+        <div class="debug-section">
+          <div class="debug-section-title">ボトル調整</div>
+          <div class="debug-grid-2">
+            <button id="incBottle" type="button" class="debug-btn success">+1 bottle</button>
+            <button id="decBottle" type="button" class="debug-btn danger">-1 bottle</button>
+          </div>
+        </div>
+        
+        <!-- System Controls -->
+        <div class="debug-section">
+          <div class="debug-section-title">システム</div>
+          <div class="debug-grid">
+            <button id="enableSEBtn" type="button" class="debug-btn">Enable SE</button>
+            <button id="soundTestBtn" type="button" class="debug-btn">音テスト</button>
+            <button id="notifyTestBtn" type="button" class="debug-btn">通知テスト</button>
+            <button id="iosHelpBtn" type="button" class="debug-btn">iOS 手順</button>
+          </div>
+          <div class="debug-hint">開発用: ブラウザの自動再生制限を回避するためクリックで有効化</div>
+        </div>
+        
+        <!-- Push Controls -->
+        <div class="debug-section">
+          <div class="debug-section-title">Push通知</div>
+          <div class="debug-grid-2">
+            <button id="pushSubscribeBtn" type="button" class="debug-btn">Push 登録</button>
+            <button id="pushUnsubscribeBtn" type="button" class="debug-btn danger">Push 解除</button>
+          </div>
+          <div class="debug-status">
+            <div class="status-row">
+              <span class="status-label">状態:</span>
+              <span id="pushStatus" class="status-value">未確認</span>
+            </div>
+            <div class="status-row">
+              <span class="status-label">VAPID:</span>
+              <code id="vapidKey" class="status-code"></code>
+            </div>
+            <div class="status-row">
+              <span class="status-label">Endpoint:</span>
+              <code id="pushEndpoint" class="status-code"></code>
+            </div>
+          </div>
+        </div>
+      </div>
+    </details>
   </section>
 
   <dialog id="iosHelpDialog">

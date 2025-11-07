@@ -1151,7 +1151,7 @@ function bindAutoSaveControls(){
 
 // Debug UI bindings
 function syncDebugDisplay(){
-  const el = document.getElementById('debugLayerDisplay');
+  const el = document.getElementById('debugLayerBadge');
   if(!el) return;
   el.textContent = `Layer: ${today.layerTotal || 0}`;
 }
