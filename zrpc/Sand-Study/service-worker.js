@@ -1,5 +1,5 @@
 // Bump cache name when assets change so clients get the updated index.html
-const CACHE = "bottle-v4";
+const CACHE = "bottle-v5";
 const ASSETS = ["/","/index.html","/history.html","/app.js","/history.js","/styles.css","/manifest.json",
   "/apple-touch-icon.png","/apple-touch-icon.svg","/icons/icon-192.svg","/icons/icon-512.svg",
   "/icons/icon-192.png","/icons/icon-512.png",
