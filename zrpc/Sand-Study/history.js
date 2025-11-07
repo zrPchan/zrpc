@@ -237,6 +237,40 @@ document.addEventListener('DOMContentLoaded', ()=>{
   const debugDateEl = document.getElementById('debugDate');
   if(debugDateEl) debugDateEl.value = today;
   
+  // Render function - reusable for both manual draw and auto-update
+  function renderAll(){
+    const s = parseDateInput('startDate'); 
+    const e = parseDateInput('endDate');
+    if(!s||!e){ 
+      console.warn('Start or end date not set');
+      return; 
+    }
+    const entries = loadTasksForRange(s,e);
+    if(window && window.__DEV__){ console.log('loaded entries count', entries.length); }
+    const status = document.getElementById('historyStatus');
+    if(status) status.textContent = `読み込んだエントリ: ${entries.length}`;
+    
+    if(entries.length === 0){
+      if(status) status.textContent = '読み込んだエントリ: 0（データがありません）';
+      // clear canvases if present
+      const moodCanvas = document.getElementById('moodChart');
+      const effortCanvas = document.getElementById('effortChart');
+      if(moodCanvas){ const ctx = moodCanvas.getContext('2d'); ctx.clearRect(0, 0, moodCanvas.width, moodCanvas.height); }
+      if(effortCanvas){ const ctx = effortCanvas.getContext('2d'); ctx.clearRect(0, 0, effortCanvas.width, effortCanvas.height); }
+      const container = document.getElementById('bottleList'); if(container) container.innerHTML = '<div class="log-empty">データがありません</div>';
+      // still attach export (no-op)
+      document.getElementById('exportCsv').onclick = ()=> exportCsv(entries);
+      return;
+    }
+    const agg = aggregateHourly(entries);
+    renderChart('moodChart','Mood 頻度', agg.dailyHourlyMoodFreq, s, e);
+    renderChart('effortChart','Effort 頻度', agg.dailyHourlyEffFreq, s, e);
+    renderBottleList(s,e);
+    // attach csv export
+    document.getElementById('exportCsv').onclick = ()=> exportCsv(entries);
+  }
+  
+  // デバッグ用ログ追加機能
   document.getElementById('addDebugLog')?.addEventListener('click', () => {
     const dateStr = document.getElementById('debugDate')?.value;
     const timeStr = document.getElementById('debugTime')?.value || '12:00';
@@ -275,37 +309,14 @@ document.addEventListener('DOMContentLoaded', ()=>{
     if(statusEl){
       statusEl.textContent = `✅ 追加完了: ${dateStr} ${timeStr} M=${m} E=${e} Layer=${layer}`;
       statusEl.style.color = '#22c55e';
-      setTimeout(() => { statusEl.textContent = ''; }, 3000);
+      // Don't auto-clear the message - let user see the result
     }
     
     console.log('Debug log added:', debugEntry);
+    
+    // Auto-refresh the display
+    renderAll();
   });
 
-  document.getElementById('drawBtn').addEventListener('click', ()=>{
-    const s = parseDateInput('startDate'); const e = parseDateInput('endDate');
-    if(!s||!e){ alert('開始日と終了日を選択してください'); return; }
-    const entries = loadTasksForRange(s,e);
-  if(window && window.__DEV__){ console.log('loaded entries count', entries.length); }
-    const status = document.getElementById('historyStatus');
-    if(status) status.textContent = `読み込んだエントリ: ${entries.length}`;
-    if(entries.length === 0){
-      if(status) status.textContent = '読み込んだエントリ: 0（データがありません）';
-      // clear canvases if present
-      const moodCanvas = document.getElementById('moodChart');
-      const effortCanvas = document.getElementById('effortChart');
-      if(moodCanvas){ const ctx = moodCanvas.getContext('2d'); ctx.clearRect(0, 0, moodCanvas.width, moodCanvas.height); }
-      if(effortCanvas){ const ctx = effortCanvas.getContext('2d'); ctx.clearRect(0, 0, effortCanvas.width, effortCanvas.height); }
-      const container = document.getElementById('bottleList'); if(container) container.innerHTML = '<div class="log-empty">データがありません</div>';
-      alert('選択範囲にデータが見つかりません');
-      // still attach export (no-op)
-      document.getElementById('exportCsv').onclick = ()=> exportCsv(entries);
-      return;
-    }
-    const agg = aggregateHourly(entries);
-    renderChart('moodChart','Mood 頻度', agg.dailyHourlyMoodFreq, s, e);
-    renderChart('effortChart','Effort 頻度', agg.dailyHourlyEffFreq, s, e);
-    renderBottleList(s,e);
-    // attach csv export
-    document.getElementById('exportCsv').onclick = ()=> exportCsv(entries);
-  });
+  document.getElementById('drawBtn').addEventListener('click', renderAll);
 });
