@@ -144,33 +144,50 @@ function renderChart(canvasId, label, freqData, startDate, endDate){
       }]
     },
     options: {
+      responsive: true,
+      maintainAspectRatio: true,
+      aspectRatio: 2,
       scales: {
         x: {
           type: 'linear',
           min: -0.5,
           max: 23.5,
-          ticks: { stepSize: 1, callback: (v) => Number.isInteger(v) ? `${v}:00` : '' },
-          title: { display: true, text: '時刻', font: { size: 14 } },
-          grid: { color: 'rgba(200,200,200,0.2)' }
+          ticks: { 
+            stepSize: 2,
+            callback: (v) => Number.isInteger(v) ? `${v}時` : '',
+            font: { size: 11 }
+          },
+          title: { display: true, text: '時刻', font: { size: 13, weight: 'bold' } },
+          grid: { color: 'rgba(150,150,150,0.15)', drawTicks: true }
         },
         y: {
           type: 'linear',
           min: -0.5,
           max: days.length - 0.5,
-          ticks: { stepSize: 1, callback: (v) => Number.isInteger(v) ? (days[v] || '') : '' },
-          title: { display: true, text: '日付', font: { size: 14 } },
-          grid: { color: 'rgba(200,200,200,0.2)' }
+          ticks: { 
+            stepSize: 1,
+            callback: (v) => {
+              const idx = Math.round(v);
+              return (idx >= 0 && idx < days.length) ? days[idx].slice(5) : ''; // MM-DD format
+            },
+            font: { size: 10 }
+          },
+          title: { display: true, text: '日付 (月-日)', font: { size: 13, weight: 'bold' } },
+          grid: { color: 'rgba(150,150,150,0.15)', drawTicks: true }
         }
       },
       plugins: {
-        legend: { display: true },
+        legend: { 
+          display: true,
+          labels: { font: { size: 12 } }
+        },
         tooltip: {
           callbacks: {
             label: (ctx) => {
               const point = ctx.raw;
               return [
-                `最頻値: ${point.score}`,
-                `出現回数: ${point.count}/${point.total}`,
+                `最頻値: ${point.score}点`,
+                `出現: ${point.count}回 / ${point.total}回`,
                 `時刻: ${point.x}:00`,
                 `日付: ${days[point.y]}`
               ];
