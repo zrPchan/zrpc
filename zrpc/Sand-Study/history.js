@@ -2,7 +2,7 @@
 
 // Responsive canvas sizing
 function getResponsiveCanvasSize(){
-  const containerWidth = Math.min(window.innerWidth - 40, 1800); // 最大1800px、左右20pxマージン
+  const containerWidth = Math.min(window.innerWidth - 40, 3000); // 最大3000px、左右20pxマージン
   const isMobile = window.innerWidth < 768;
   
   if(isMobile){
