@@ -56,7 +56,12 @@ if(VAPID_PUBLIC && VAPID_PRIVATE){
 
 const app = express();
 app.use(bodyParser.json());
-app.use(express.static(path.join(__dirname, '..'))); // serve project files for convenience
+
+// Serve static files from parent directory (Sand-Study root)
+app.use(express.static(path.join(__dirname, '..'), { 
+  index: 'index.html',  // explicitly serve index.html for directory requests
+  extensions: ['html']   // auto-append .html to extensionless paths
+}));
 
 // Simple Basic Auth middleware for admin routes
 function basicAuth(req, res, next){
