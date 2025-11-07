@@ -101,83 +101,96 @@ function renderChart(canvasId, label, freqData, startDate, endDate){
   const variance = allCounts.length > 0 ? allCounts.reduce((a,b)=>a+Math.pow(b-mean,2),0) / allCounts.length : 1;
   const stdDev = Math.sqrt(variance);
   
-  // Second pass: create heat data with deviation scores
+  // Create heatmap matrix data
+  const matrixData = [];
   for(let hour = 0; hour < 24; hour++){
     const scores = hourlyFreq[hour];
-    if(Object.keys(scores).length === 0) continue;
     
     // For each score value (1-5), calculate frequency and deviation
     for(let scoreVal = 1; scoreVal <= 5; scoreVal++){
       const count = scores[scoreVal] || 0;
-      if(count > 0){
-        // Calculate deviation score (偏差値): 50 + 10 * (x - mean) / stdDev
-        const deviation = stdDev > 0 ? 50 + 10 * (count - mean) / stdDev : 50;
-        
-        heatData.push({
-          x: hour,
-          y: scoreVal, // y-axis is score value (1-5)
-          count: count,
-          deviation: Math.max(0, Math.min(100, deviation)) // clamp to 0-100
-        });
-      }
+      // Calculate deviation score (偏差値): 50 + 10 * (x - mean) / stdDev
+      const deviation = count > 0 && stdDev > 0 ? 50 + 10 * (count - mean) / stdDev : (count > 0 ? 50 : 0);
+      
+      matrixData.push({
+        x: hour,
+        y: scoreVal,
+        v: Math.max(0, Math.min(100, deviation)) // deviation value (0-100)
+      });
     }
   }
   
-  // Color scale based on deviation score
+  // Color scale based on deviation score (heatmap gradient)
   const getColor = (deviation) => {
-    // Low deviation (cold) = blue, High deviation (hot) = red
-    // 0-30: blue, 30-50: cyan/green, 50-70: yellow/orange, 70-100: red
-    const hue = (100 - deviation) / 100 * 240; // 240=blue, 0=red
-    const saturation = 70 + (deviation / 100) * 30; // 70-100%
-    const lightness = 50;
-    return `hsla(${hue}, ${saturation}%, ${lightness}%, 0.8)`;
+    if(deviation === 0) return 'rgba(240, 240, 240, 0.3)'; // no data
+    // Gradient: blue (low) -> cyan -> green -> yellow -> orange -> red (high)
+    const colors = [
+      { dev: 0, rgb: [59, 130, 246] },    // blue
+      { dev: 30, rgb: [34, 197, 94] },    // green
+      { dev: 50, rgb: [250, 204, 21] },   // yellow
+      { dev: 70, rgb: [251, 146, 60] },   // orange
+      { dev: 100, rgb: [239, 68, 68] }    // red
+    ];
+    
+    // Find interpolation range
+    for(let i = 0; i < colors.length - 1; i++){
+      if(deviation >= colors[i].dev && deviation <= colors[i+1].dev){
+        const t = (deviation - colors[i].dev) / (colors[i+1].dev - colors[i].dev);
+        const r = Math.round(colors[i].rgb[0] + t * (colors[i+1].rgb[0] - colors[i].rgb[0]));
+        const g = Math.round(colors[i].rgb[1] + t * (colors[i+1].rgb[1] - colors[i].rgb[1]));
+        const b = Math.round(colors[i].rgb[2] + t * (colors[i+1].rgb[2] - colors[i].rgb[2]));
+        return `rgba(${r}, ${g}, ${b}, 0.85)`;
+      }
+    }
+    return 'rgba(239, 68, 68, 0.85)'; // fallback red
   };
   
   window[canvasId+'Chart'] = new Chart(ctx, {
-    type: 'bubble',
+    type: 'matrix',
     data: {
       datasets: [{
         label: label,
-        data: heatData.map(d => ({
-          x: d.x,
-          y: d.y,
-          r: 10 + (d.deviation / 100) * 15, // radius 10-25 based on deviation
-          count: d.count,
-          deviation: d.deviation.toFixed(1)
-        })),
-        backgroundColor: heatData.map(d => getColor(d.deviation)),
-        borderColor: 'rgba(0,0,0,0.4)',
-        borderWidth: 1.5
+        data: matrixData,
+        backgroundColor: (context) => {
+          const value = context.dataset.data[context.dataIndex];
+          return value ? getColor(value.v) : 'rgba(240,240,240,0.3)';
+        },
+        borderColor: 'rgba(200, 200, 200, 0.3)',
+        borderWidth: 1,
+        width: ({chart}) => (chart.chartArea || {}).width / 24 * 0.95,
+        height: ({chart}) => (chart.chartArea || {}).height / 5 * 0.95
       }]
     },
     options: {
       responsive: true,
       maintainAspectRatio: true,
-      aspectRatio: 2.5,
+      aspectRatio: 3,
       scales: {
         x: {
           type: 'linear',
           min: -0.5,
           max: 23.5,
+          offset: false,
           ticks: { 
             stepSize: 2,
-            callback: (v) => Number.isInteger(v) ? `${v}時` : '',
+            callback: (v) => Number.isInteger(v) && v >= 0 && v <= 23 ? `${v}時` : '',
             font: { size: 11 }
           },
           title: { display: true, text: '時刻', font: { size: 14, weight: 'bold' } },
-          grid: { color: 'rgba(150,150,150,0.15)' }
+          grid: { display: false }
         },
         y: {
           type: 'linear',
           min: 0.5,
           max: 5.5,
+          offset: false,
           ticks: { 
             stepSize: 1,
             callback: (v) => Number.isInteger(v) && v >= 1 && v <= 5 ? `${v}点` : '',
             font: { size: 11 }
           },
           title: { display: true, text: '評価値', font: { size: 14, weight: 'bold' } },
-          grid: { color: 'rgba(150,150,150,0.15)' }
+          grid: { display: false }
         }
       },
       plugins: {
@@ -187,13 +200,16 @@ function renderChart(canvasId, label, freqData, startDate, endDate){
         },
         tooltip: {
           callbacks: {
+            title: () => '',
             label: (ctx) => {
-              const point = ctx.raw;
+              const value = ctx.dataset.data[ctx.dataIndex];
+              const hour = value.x;
+              const score = value.y;
+              const dev = value.v.toFixed(1);
               return [
-                `評価値: ${ctx.parsed.y}点`,
-                `出現回数: ${point.count}回`,
-                `偏差値: ${point.deviation}`,
-                `時刻: ${ctx.parsed.x}:00`
+                `時刻: ${hour}:00`,
+                `評価値: ${score}点`,
+                `偏差値: ${dev}`
               ];
             }
           }
