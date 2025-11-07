@@ -66,63 +66,71 @@ function renderChart(canvasId, label, freqData, startDate, endDate){
   const ctx = canvas.getContext('2d');
   if(window[canvasId+'Chart']){ try{ window[canvasId+'Chart'].destroy(); }catch(e){} }
   
-  // Create heatmap data: x=hour (0-23), y=day, color=most frequent score
-  const days = dateRange(startDate, endDate);
-  const heatData = [];
+  // Validate freqData
+  if(!freqData || typeof freqData !== 'object'){
+    console.error('Invalid freqData:', freqData);
+    return;
+  }
   
-  // Find max frequency for color scaling
-  let maxFreq = 0;
-  Object.values(freqData).forEach(hourData => {
-    Object.values(hourData).forEach(count => {
-      if(count > maxFreq) maxFreq = count;
-    });
-  });
+  // Aggregate all days into hourly frequency map (overlapping all dates)
+  const hourlyFreq = Array(24).fill(null).map(() => ({})); // [{1:0, 2:0, 3:0, 4:0, 5:0}, ...]
   
-  days.forEach((day, dayIndex) => {
-    for(let hour = 0; hour < 24; hour++){
-      const key = `${day}:${hour}`;
-      const freq = freqData[key];
-      if(freq && Object.keys(freq).length > 0){
-        // Find most frequent score
-        let mostFreqScore = null;
-        let mostFreqCount = 0;
-        Object.entries(freq).forEach(([score, count]) => {
-          if(count > mostFreqCount){
-            mostFreqCount = count;
-            mostFreqScore = parseInt(score);
-          }
-        });
-        
-        heatData.push({
-          x: hour,
-          y: dayIndex,
-          score: mostFreqScore,
-          count: mostFreqCount,
-          total: Object.values(freq).reduce((a,b)=>a+b,0)
-        });
-      }
+  Object.entries(freqData).forEach(([key, scores]) => {
+    const hour = parseInt(key.split(':')[1]);
+    if(hour >= 0 && hour < 24 && scores && typeof scores === 'object'){
+      Object.entries(scores).forEach(([score, count]) => {
+        const s = parseInt(score);
+        if(!hourlyFreq[hour][s]) hourlyFreq[hour][s] = 0;
+        hourlyFreq[hour][s] += count;
+      });
     }
   });
   
-  // Fine-grained color scale based on score (1-5) with vibrancy based on frequency
-  const getColor = (score, count, maxCount) => {
-    if(!score) return 'rgba(200,200,200,0.1)';
+  // Calculate total count per hour and deviation score (偏差値)
+  const heatData = [];
+  const allCounts = [];
+  
+  // First pass: collect all counts for mean/stddev calculation
+  for(let hour = 0; hour < 24; hour++){
+    const scores = hourlyFreq[hour];
+    Object.values(scores).forEach(count => allCounts.push(count));
+  }
+  
+  // Calculate mean and standard deviation
+  const mean = allCounts.length > 0 ? allCounts.reduce((a,b)=>a+b,0) / allCounts.length : 0;
+  const variance = allCounts.length > 0 ? allCounts.reduce((a,b)=>a+Math.pow(b-mean,2),0) / allCounts.length : 1;
+  const stdDev = Math.sqrt(variance);
+  
+  // Second pass: create heat data with deviation scores
+  for(let hour = 0; hour < 24; hour++){
+    const scores = hourlyFreq[hour];
+    if(Object.keys(scores).length === 0) continue;
     
-    // Base color by score: 1=deep blue, 2=light blue, 3=yellow, 4=orange, 5=deep red
-    const colorMap = {
-      1: [59, 130, 246],   // blue
-      2: [96, 165, 250],   // light blue
-      3: [250, 204, 21],   // yellow
-      4: [251, 146, 60],   // orange
-      5: [239, 68, 68]     // red
-    };
-    
-    const [r, g, b] = colorMap[score] || [150, 150, 150];
-    
-    // Opacity based on frequency (more frequent = more opaque)
-    const opacity = 0.4 + (count / maxCount) * 0.6; // 0.4 to 1.0
-    
-    return `rgba(${r}, ${g}, ${b}, ${opacity})`;
+    // For each score value (1-5), calculate frequency and deviation
+    for(let scoreVal = 1; scoreVal <= 5; scoreVal++){
+      const count = scores[scoreVal] || 0;
+      if(count > 0){
+        // Calculate deviation score (偏差値): 50 + 10 * (x - mean) / stdDev
+        const deviation = stdDev > 0 ? 50 + 10 * (count - mean) / stdDev : 50;
+        
+        heatData.push({
+          x: hour,
+          y: scoreVal, // y-axis is score value (1-5)
+          count: count,
+          deviation: Math.max(0, Math.min(100, deviation)) // clamp to 0-100
+        });
+      }
+    }
+  }
+  
+  // Color scale based on deviation score
+  const getColor = (deviation) => {
+    // Low deviation (cold) = blue, High deviation (hot) = red
+    // 0-30: blue, 30-50: cyan/green, 50-70: yellow/orange, 70-100: red
+    const hue = (100 - deviation) / 100 * 240; // 240=blue, 0=red
+    const saturation = 70 + (deviation / 100) * 30; // 70-100%
+    const lightness = 50;
+    return `hsla(${hue}, ${saturation}%, ${lightness}%, 0.8)`;
   };
   
   window[canvasId+'Chart'] = new Chart(ctx, {
@@ -133,20 +141,19 @@ function renderChart(canvasId, label, freqData, startDate, endDate){
         data: heatData.map(d => ({
           x: d.x,
           y: d.y,
-          r: 8 + (d.count / maxFreq) * 12, // radius 8-20 based on frequency
-          score: d.score,
+          r: 10 + (d.deviation / 100) * 15, // radius 10-25 based on deviation
           count: d.count,
-          total: d.total
+          deviation: d.deviation.toFixed(1)
         })),
-        backgroundColor: heatData.map(d => getColor(d.score, d.count, maxFreq)),
-        borderColor: 'rgba(0,0,0,0.3)',
-        borderWidth: 1
+        backgroundColor: heatData.map(d => getColor(d.deviation)),
+        borderColor: 'rgba(0,0,0,0.4)',
+        borderWidth: 1.5
       }]
     },
     options: {
       responsive: true,
       maintainAspectRatio: true,
-      aspectRatio: 2,
+      aspectRatio: 2.5,
       scales: {
         x: {
           type: 'linear',
@@ -157,23 +164,20 @@ function renderChart(canvasId, label, freqData, startDate, endDate){
             callback: (v) => Number.isInteger(v) ? `${v}時` : '',
             font: { size: 11 }
           },
-          title: { display: true, text: '時刻', font: { size: 13, weight: 'bold' } },
-          grid: { color: 'rgba(150,150,150,0.15)', drawTicks: true }
+          title: { display: true, text: '時刻', font: { size: 14, weight: 'bold' } },
+          grid: { color: 'rgba(150,150,150,0.15)' }
         },
         y: {
           type: 'linear',
-          min: -0.5,
-          max: days.length - 0.5,
+          min: 0.5,
+          max: 5.5,
           ticks: { 
             stepSize: 1,
-            callback: (v) => {
-              const idx = Math.round(v);
-              return (idx >= 0 && idx < days.length) ? days[idx].slice(5) : ''; // MM-DD format
-            },
-            font: { size: 10 }
+            callback: (v) => Number.isInteger(v) && v >= 1 && v <= 5 ? `${v}点` : '',
+            font: { size: 11 }
           },
-          title: { display: true, text: '日付 (月-日)', font: { size: 13, weight: 'bold' } },
-          grid: { color: 'rgba(150,150,150,0.15)', drawTicks: true }
+          title: { display: true, text: '評価値', font: { size: 14, weight: 'bold' } },
+          grid: { color: 'rgba(150,150,150,0.15)' }
         }
       },
       plugins: {
@@ -186,10 +190,10 @@ function renderChart(canvasId, label, freqData, startDate, endDate){
             label: (ctx) => {
               const point = ctx.raw;
               return [
-                `最頻値: ${point.score}点`,
-                `出現: ${point.count}回 / ${point.total}回`,
-                `時刻: ${point.x}:00`,
-                `日付: ${days[point.y]}`
+                `評価値: ${ctx.parsed.y}点`,
+                `出現回数: ${point.count}回`,
+                `偏差値: ${point.deviation}`,
+                `時刻: ${ctx.parsed.x}:00`
               ];
             }
           }
