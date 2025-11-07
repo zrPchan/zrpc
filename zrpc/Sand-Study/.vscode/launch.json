@@ -1,0 +1,32 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Launch Server (server/index.js)",
+      "program": "${workspaceFolder}/server/index.js",
+      "cwd": "${workspaceFolder}/server",
+      "console": "integratedTerminal",
+      "env": {
+        "ADMIN_OFF": "1"
+      }
+    },
+    {
+      "type": "chrome",
+      "request": "launch",
+      "name": "Launch Chrome (open http://localhost:3000/)",
+      "url": "http://localhost:3000/",
+      "webRoot": "${workspaceFolder}",
+      "userDataDir": "${workspaceFolder}/.vscode/chrome",
+      "preLaunchTask": ""
+    },
+    {
+      "name": "Attach to Node Process",
+      "type": "node",
+      "request": "attach",
+      "processId": "${command:PickProcess}",
+      "restart": false
+    }
+  ]
+}

@@ -1,6 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="640" height="1136" viewBox="0 0 640 1136">
-  <rect width="100%" height="100%" fill="#ffffff"/>
-  <circle cx="320" cy="420" r="120" fill="#cdb88a"/>
-  <rect x="120" y="620" width="400" height="180" rx="12" fill="#efe6d1"/>
-  <text x="320" y="720" font-size="32" text-anchor="middle" fill="#444">Bottle</text>
-</svg>

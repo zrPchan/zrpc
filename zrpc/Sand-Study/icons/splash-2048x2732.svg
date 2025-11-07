@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="2048" height="2732" viewBox="0 0 2048 2732">
+  <rect width="100%" height="100%" fill="#ffffff"/>
+  <circle cx="1024" cy="900" r="360" fill="#cdb88a"/>
+  <rect x="362" y="1320" width="1324" height="420" rx="36" fill="#efe6d1"/>
+  <text x="1024" y="1500" font-size="120" text-anchor="middle" fill="#444">Bottle</text>
+</svg>

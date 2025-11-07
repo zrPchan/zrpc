@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="utf-8">
+
+    <!-- for SmartPhone -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+    <!-- for iPhone -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+
+    <link rel="apple-touch-icon" sizes="57x57" href="icon_57.png" />
+    <link rel="apple-touch-icon" sizes="72x72" href="icon_72.png" />
+    <link rel="apple-touch-icon" sizes="114x114" href="icon_114.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="icon_180.png" />
+
+    <link rel="stylesheet" href="style.css">
+
+    <title>ゲーム一覧</title>
+</head>
+<body>
+    <h1>ゲーム一覧</h1>
+
+    <div class="game-list">
+        <!-- ゲームカード1 -->
+        <div class="game-card">
+            <img src="pic/SquashPic.png" alt="ゲーム1の画像" class="game-image">
+            <h2 class="game-title">スカッシュ</h2>
+            <p class="game-description">スカッシュとは、バーでボールを跳ね返し続けるレトロゲームです。</p>
+            <a href="squash/squash.html" target="_blank" class="game-link">プレイする</a>
+            <a href="squash/squash.exe" download class="game-link">ダウンロード</a>
+        </div>
+
+        <!-- ゲームカード2 -->
+        <div class="game-card">
+            <img src="pic/RevPic.png" alt="ゲーム2の画像" class="game-image">
+            <h2 class="game-title">Rev.ちゃん</h2>
+            <p class="game-description">簡単なお話ソフト</p>
+            <a href="rev/RevTalk.exe" download class="game-link">ダウンロード</a>
+        </div>
+
+        <!-- ゲームカード3 -->
+        <div class="game-card">
+            <img src="pic/comingsoon.png" alt="ゲーム3の画像" class="game-image">
+            <h2 class="game-title">ゲームタイトル3</h2>
+            <p class="game-description">ゲーム3の簡単な説明文をここに記載します。このゲームはZZZをテーマにしています。</p>
+            <!-- <a href="game3.html" target="_blank" class="game-link">プレイする</a> -->
+        </div>
+
+        <!-- 追加のゲームカードはここに -->
+    </div>
+
+    <canvas id="canvas"></canvas>
+
+    <noscript>JavaScriptをONにして起動して下さい</noscript>
+</body>
+</html>

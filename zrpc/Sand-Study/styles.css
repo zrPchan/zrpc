@@ -1,0 +1,274 @@
+:root{
+  --bg-1: #fff7fb; /* page gradient start */
+  --bg-2: #fffcf5; /* page gradient end */
+  --card: #fffefc; /* card / panel */
+  --muted: #7b6b7b; /* muted text */
+  --accent: #f6a4d9; /* primary accent */
+  --accent-2: #ffd3a5; /* secondary accent */
+  --accent-3: #b89258; /* tertiary/accent shadow */
+  --shadow: 0 8px 20px rgba(34,20,35,0.06);
+
+  /* sand palette used by .sand-layer (top -> bottom) */
+  --sand-1: #f3e0bf;
+  --sand-2: #d6b77a;
+
+  /* semantic tokens */
+  --text: #38263a; /* main text */
+  --text-strong: #4b3b4b;
+  --border: rgba(0,0,0,0.06);
+  --btn-bg: #fff;
+  --btn-bg-2: #fff;
+  --btn-text: #5a2b3a;
+  --overtime-bg: #fff4e5;
+  --overtime-border: #f0c080;
+  --overtime-text: #7a4b11;
+  --chip-bg: #fff2f7;
+  --update-bg: #0b63ff;
+}
+
+body{font-family:'Baloo 2','Inter',system-ui,-apple-system,'Segoe UI',Roboto,Helvetica,Arial; margin:18px; color:var(--text); background: linear-gradient(180deg, var(--bg-1), var(--bg-2));}
+.stats .big{font-size:30px;font-weight:700}
+.stats .mid{font-size:16px;margin-top:6px;color:var(--muted)}
+.stats .small{font-size:13px;color:var(--muted)}
+.bottle{position:relative;width:160px;height:260px;margin:18px auto;border-radius:28px;overflow:hidden;background:linear-gradient(180deg,var(--card),var(--bg-2));box-shadow:var(--shadow);border:1px solid var(--border)}
+.rim{position:absolute;inset:0;border-radius:28px;pointer-events:none}
+.sand{position:absolute;left:8px;right:8px;bottom:8px;height:calc(100% - 16px);overflow:hidden;border-radius:18px}
+.sand-layer{position:absolute;left:0;width:100%;box-sizing:border-box;border-top:1px solid rgba(0,0,0,0.03);border-radius:8px;background:linear-gradient(180deg,var(--sand-1),var(--sand-2))}
+.sand-layer.partial{border-top:1px solid rgba(0,0,0,0.06)}
+.controls{display:flex;gap:12px;justify-content:center;margin-top:20px;flex-wrap:wrap}
+.controls button{min-width:84px}
+
+/* base button */
+button{padding:10px 14px;border-radius:999px;border:none;background:linear-gradient(180deg,var(--btn-bg),var(--btn-bg-2));box-shadow:0 6px 18px rgba(0,0,0,0.06);cursor:pointer;font-weight:600;transition:transform .12s ease,box-shadow .12s ease}
+button:hover{transform:translateY(-2px)}
+button:active{transform:translateY(0)}
+button:focus{outline:3px solid rgba(246,164,217,0.18);outline-offset:3px}
+
+/* button variants */
+.btn-primary, .primary{ background: linear-gradient(180deg,var(--accent),var(--accent-2)); color: var(--btn-text); box-shadow: 0 10px 26px rgba(0,0,0,0.06) }
+.btn-outline{ background: transparent; border: 1px solid var(--border); color: var(--text-strong) }
+.btn-ghost{ background: transparent; color: var(--muted); box-shadow:none }
+button[disabled], .btn-disabled{ opacity:0.5; cursor: default; transform:none }
+dialog{border:none;border-radius:12px;padding:14px;background:var(--card);box-shadow:0 12px 40px rgba(34,20,35,0.08)}
+/* Ensure dialog appears above embedded overlays (reset overlay z-index:80) */
+dialog[open], dialog.modal-fallback{position:fixed;z-index:1000;left:50%;top:50%;transform:translate(-50%,-50%);max-width:92%;box-shadow:0 12px 40px rgba(0,0,0,0.35);pointer-events:auto}
+label{display:block;margin:6px 0}
+.row{display:flex;gap:8px;justify-content:flex-end;margin-top:6px}
+.countdown{position:absolute;top:8px;right:12px;font-size:12px;color:var(--muted)}
+.stat{display:flex;align-items:center;gap:8px}
+main{max-width:420px;margin:0 auto;padding:8px}
+@media (prefers-reduced-motion: reduce){*{transition:none!important}}
+
+/* Timer display */
+.timer{text-align:center;margin-top:6px}
+.timer > div:first-child{font-size:18px;font-weight:600}
+#timerDisplay{font-size:20px;letter-spacing:1px}
+
+.countdown-ui{text-align:center;margin-top:12px;display:flex;flex-direction:column;align-items:center;gap:14px}
+.circle-wrap{position:relative;width:160px;height:160px;margin:0 auto 8px auto;display:flex;align-items:center;justify-content:center}
+.countdown-ring{transform:rotate(-90deg);transform-box:fill-box;transform-origin:center}
+.ring-bg{stroke:rgba(0,0,0,0.04)}
+.ring-fg{stroke:var(--accent);transition:stroke-dashoffset 0.5s linear}
+.circle-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.countdown-text{font-size:22px;font-weight:700;font-family:monospace}
+.countdown-sub{font-size:12px;color:var(--muted)}
+.countdown-controls{margin-top:8px;display:flex;gap:8px;justify-content:center}
+.countdown-controls button{padding:8px 12px;border-radius:6px;border:1px solid var(--border);background:var(--btn-bg)}
+
+/* disabled button appearance */
+button:disabled{opacity:0.5;cursor:not-allowed}
+
+.log-list-outer{border-top:1px solid rgba(0,0,0,0.06);padding:8px}
+.log-list{max-height:260px;overflow:auto;padding:0;display:flex;flex-direction:column;gap:12px;margin:0 auto;width:100%;box-sizing:border-box}
+.log-item{background:linear-gradient(180deg,var(--card),var(--card));border-radius:14px;padding:14px;border:1px solid var(--border);box-shadow:0 8px 20px rgba(34,20,35,0.04);font-size:14px}
+.log-item{overflow-wrap:anywhere}
+.log-meta{display:flex;gap:8px;color:var(--muted);font-size:12px;margin-bottom:8px}
+.log-layer{font-weight:700;color:var(--accent-3)}
+.log-comment{color:var(--text-strong)}
+.log-empty{color:var(--muted);text-align:center;padding:12px}
+
+.log-empty-text{color:var(--muted)}
+
+/* Debug panel */
+#debugPanel{padding:8px;max-width:420px;margin:12px auto;border-top:1px solid var(--border)}
+#debugPanel .debug-header{display:flex;justify-content:space-between;align-items:center}
+#debugPanel .debug-controls{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap}
+#debugPanel .debug-controls button{padding:6px 8px;border-radius:6px;border:1px solid var(--border);background:var(--btn-bg)}
+#debugPanel .debug-row{margin-top:8px;display:flex;gap:8px;align-items:center}
+#debugPanel input[type=number]{flex:1;padding:6px;border:1px solid var(--border);border-radius:6px}
+#enableSEBtn{background:var(--accent-2);border-color:var(--accent)}
+#debugPanel .hint{font-size:12px;color:var(--muted)}
+
+/* Overtime alert banner */
+#overtimeAlert{display:none;padding:8px;background:var(--overtime-bg);border:1px solid var(--overtime-border);color:var(--overtime-text);text-align:center;border-radius:6px;margin-bottom:8px;max-width:420px;margin-left:auto;margin-right:auto}
+#overtimeAlert button{margin-left:12px;padding:4px 8px;border-radius:6px;border:1px solid var(--border);background:var(--btn-bg)}
+
+/* Desktop: restrict log list width to ~1/3 so scrollbar sits next to cards */
+@media (min-width: 900px){
+  .log-list{max-width:33%;}
+}
+
+/* Truncate warning inside end modal */
+.truncate-warning{display:none;margin-top:8px;padding:10px;border-radius:10px;background:var(--overtime-bg);border:1px solid var(--overtime-border);color:var(--overtime-text)}
+.truncate-warning .actions{display:flex;gap:8px;margin-top:8px;justify-content:flex-end}
+.truncate-warning button{padding:6px 8px}
+
+/* character counter next to inputs in modal */
+.char-counter{display:inline-block;margin-left:8px;font-size:12px;color:var(--muted);background:var(--chip-bg);padding:4px 8px;border-radius:999px;border:1px solid rgba(0,0,0,0.03)}
+.char-counter.small{font-size:11px;color:var(--muted);padding:2px 4px}
+
+/* Embedded popup overlay for reset confirmation (not native dialog) */
+.overlay{position:fixed;inset:0;background:rgba(55,32,45,0.18);align-items:center;justify-content:center;z-index:80;display:none}
+
+/* utility classes moved from inline styles in index.html */
+.text-center{ text-align:center }
+.mt-8{ margin-top:8px }
+.mt-10{ margin-top:10px }
+.form-dialog{ max-width:480px; padding:16px }
+.actions-right{ text-align:right; margin-top:8px }
+.code-inline{ word-break:break-all; max-width:420px; display:inline-block }
+
+/* additional spacing and container utilities used by history/admin pages */
+.mt-12{ margin-top:12px }
+.mt-16{ margin-top:16px }
+.mt-18{ margin-top:18px }
+.container-720{ max-width:720px; margin:18px auto }
+.muted{ color:var(--muted) }
+.text-muted{ color:var(--text-strong) }
+.overlay[aria-hidden="false"]{display:flex}
+.popup-box{background:white;border-radius:10px;padding:12px;width:280px;max-width:90%;box-shadow:0 8px 24px rgba(0,0,0,0.2);border:1px solid rgba(0,0,0,0.06);transform-origin:center center;transition:transform 160ms ease,opacity 120ms ease}
+.overlay[style*="display:block"] .popup-box, .overlay[style*="display:flex"] .popup-box{transform:scale(1);opacity:1}
+.popup-box[hidden]{transform:scale(0.96);opacity:0}
+.popup-title{font-weight:700;font-size:16px;color:var(--text-strong);text-align:center}
+.popup-body{text-align:center}
+.popup-actions{display:flex;justify-content:center;gap:8px;margin-top:12px}
+.popup-actions button:first-child{margin-right:8px}
+
+/* Target time input and buttons */
+/* Target time row: center the label, input, button and badge */
+.target-row{display:flex;gap:8px;justify-content:center;align-items:center;margin-top:8px}
+.target-row label{margin-right:4px}
+#targetMinutesInput{width:72px;padding:6px;border:1px solid var(--border);border-radius:6px}
+#upgradeBtn{padding:6px 10px;border-radius:6px}
+#proBadge{margin-left:8px;font-weight:600;color:var(--muted)}
+
+/* Logs header */
+#logs h4{text-align:center;margin-top:8px}
+
+/* Truncate warning actions (used in modal) */
+.truncate-warning .actions{display:flex;gap:8px;margin-top:8px;justify-content:flex-end}
+.btn-primary{background:var(--accent-3);color:white;border-color:var(--accent-3)}
+.btn-primary:hover{filter:brightness(0.98)}
+
+/* Mobile debug toast for devices without console access (iPhone) */
+#mobileToast{position:fixed;left:50%;bottom:14px;transform:translateX(-50%);background:rgba(0,0,0,0.85);color:white;padding:8px 12px;border-radius:8px;font-size:14px;z-index:3000;display:none;max-width:90%;text-align:center}
+.toast-show{display:block;opacity:1;transition:opacity 200ms ease}
+.toast-hide{opacity:0;transition:opacity 200ms ease}
+
+/* Update banner shown when a new Service Worker / app version is available */
+#updateBanner{position:fixed;left:50%;top:12px;transform:translateX(-50%);background:var(--update-bg);color:white;padding:10px 14px;border-radius:8px;z-index:4000;display:none;align-items:center;gap:12px;box-shadow:0 8px 24px rgba(0,0,0,0.12);max-width:92%}
+#updateBanner .msg{flex:1;font-size:15px}
+#updateBanner .actions{display:flex;gap:8px}
+#updateBanner button{padding:6px 10px;border-radius:6px;border:none;background:rgba(255,255,255,0.12);color:white}
+#updateBanner button.primary{background:white;color:var(--update-bg)}
+
+/* Visual flash for save button when tapped to confirm interaction */
+.save-flash{box-shadow:0 0 0 3px rgba(184,146,88,0.45);}
+
+/* update controls (manual check) */
+.update-controls{max-width:420px;margin:6px auto 0 auto;text-align:center;display:none}
+.update-controls .btn-ghost{border-radius:8px;padding:6px 10px}
+
+/* Favorites popup */
+.favorites-popup{
+  /* use overlay centering; don't use fixed positioning here */
+  position:relative;
+  background:var(--card);
+  border-radius:12px;
+  padding:12px;
+  box-shadow:0 14px 40px rgba(34,20,35,0.12);
+  width:320px;max-width:92%;z-index:500;display:block
+}
+.favorites-popup[aria-hidden="false"]{display:block}
+.favorites-popup .fav-header{font-weight:700;margin-bottom:8px;text-align:center}
+.favorites-popup .fav-body{display:flex;flex-direction:column;gap:8px}
+.fav-add{display:flex;gap:8px;align-items:center}
+.fav-add input{flex:1;padding:8px;border-radius:8px;border:1px solid var(--border)}
+.fav-add button{padding:8px 10px;border-radius:8px;background:var(--accent-2);border:none}
+.fav-list{max-height:240px;overflow:auto;display:flex;flex-direction:column;gap:6px}
+.fav-item{display:flex;justify-content:space-between;align-items:center;padding:8px;border-radius:8px;background:linear-gradient(180deg,var(--card),var(--card));border:1px solid var(--border)}
+.fav-item button{margin-left:8px;padding:6px 8px;border-radius:6px}
+.fav-actions{display:flex;justify-content:center;margin-top:8px}
+
+/* small favorite icon near inputs */
+#favOpenBtn{margin-left:6px;padding:6px 8px;border-radius:8px;background:transparent;border:1px solid var(--border);cursor:pointer}
+
+/* Small screen adjustments */
+@media (max-width:600px){
+  body{margin:12px}
+  .container-720{max-width:92%;margin:12px auto}
+  .bottle{width:130px;height:210px}
+  .circle-wrap{width:132px;height:132px}
+  .countdown-text{font-size:18px}
+  .controls{gap:8px}
+  .controls button{min-width:64px;padding:8px 10px;font-size:14px}
+  .log-list{gap:10px}
+  .log-item{padding:10px}
+  .stats .big{font-size:22px}
+}
+
+/* Extra small screen / mobile refinements to prevent layout breakage */
+@media (max-width:420px){
+  /* let main use most of the viewport */
+  main{max-width:98%;padding:10px}
+
+  /* make controls wrap and allow flexible buttons so they don't overflow */
+  .controls{flex-wrap:wrap;align-items:center}
+  .controls button{min-width:0;flex:1 1 auto;margin:6px 4px}
+
+  /* target row: stack on narrow screens */
+  .target-row{flex-wrap:wrap;gap:6px;justify-content:center}
+  #targetMinutesInput{width:64px}
+
+  /* reduce bottle and circle sizes slightly */
+  .bottle{width:120px;height:190px}
+  .circle-wrap{width:120px;height:120px;margin:0 auto 8px auto}
+  .countdown-text{font-size:16px}
+
+  /* reduce top spacing so the important UI is visible without excessive scroll */
+  .stats{margin-top:8px}
+  .countdown-ui{margin-top:6px}
+
+  /* make logs occupy full width and readable */
+  .log-list{max-width:100%;padding:6px}
+  .log-item{padding:10px}
+
+  /* ensure dialogs and overlays fit */
+  dialog, .popup-box{max-width:94%}
+}
+
+/* Theme picker styles */
+.theme-popup{background:var(--card);border-radius:12px;padding:12px;width:520px;max-width:92%;box-shadow:0 18px 48px rgba(34,20,35,0.18)}
+.theme-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;padding:6px}
+.theme-swatch{border-radius:8px;padding:8px;border:1px solid var(--border);background:linear-gradient(180deg,var(--card),var(--card));display:flex;flex-direction:column;align-items:center;gap:8px;cursor:pointer}
+.theme-swatch:hover{transform:translateY(-4px);box-shadow:0 10px 30px rgba(34,20,35,0.08)}
+.swatch-sample{width:48px;height:36px;border-radius:6px;display:block;border:1px solid rgba(0,0,0,0.04)}
+.swatch-label{font-size:12px;color:var(--muted);text-align:center}
+
+/* Theme variable classes: each theme sets the core CSS variables used by the app */
+.theme-sand{ --bg-1:#fffaf5; --bg-2:#fff6ec; --card:#fffef8; --muted:#6b5f4a; --accent:#d6b77a; --accent-2:#f3e0bf; --accent-3:#b89258; --sand-1:#fff3df; --sand-2:#d6b77a }
+.theme-red{ --bg-1:#fff6f6; --bg-2:#fff1f1; --card:#ffffff; --muted:#6b4b4b; --accent:#e05a6a; --accent-2:#f6c9cf; --accent-3:#b33a46; --sand-1:#ffd6d9; --sand-2:#e05a6a }
+.theme-blue{ --bg-1:#f6fbff; --bg-2:#eef7ff; --card:#ffffff; --muted:#3b4b5b; --accent:#4a8fe0; --accent-2:#cfe8ff; --accent-3:#2f6fb3; --sand-1:#cfe8ff; --sand-2:#4a8fe0 }
+.theme-green{ --bg-1:#f6fff6; --bg-2:#f0fff0; --card:#ffffff; --muted:#3b6b4b; --accent:#34a853; --accent-2:#cdefd0; --accent-3:#2f8b5a; --sand-1:#cdefd0; --sand-2:#34a853 }
+.theme-pink{ --bg-1:#fff7fb; --bg-2:#fff2f8; --card:#ffffff; --muted:#6b4b5b; --accent:#f47aa6; --accent-2:#ffd6ea; --accent-3:#c04b6b; --sand-1:#ffd6ea; --sand-2:#f47aa6 }
+.theme-silver{ --bg-1:#f7f8fa; --bg-2:#eef0f3; --card:#ffffff; --muted:#55606b; --accent:#9aa6b3; --accent-2:#e6ebf1; --accent-3:#6b7784; --sand-1:#e6ebf1; --sand-2:#9aa6b3 }
+
+/* Solid palettes replace pastel/dark sets: stronger, single-hue sand gradients */
+/* removed Solid palettes by user request */
+
+/* swatch preview helper (show gradient using theme preview variables when applied to :root). We use inline background on each swatch for explicit preview colors. */
+.theme-swatch .swatch-sample{box-shadow:inset 0 -6px 10px rgba(0,0,0,0.04)}
+
+@media (max-width:600px){
+  .theme-grid{grid-template-columns:repeat(4,1fr)}
+}

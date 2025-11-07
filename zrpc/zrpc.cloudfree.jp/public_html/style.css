@@ -1,0 +1,81 @@
+/* 基本スタイル */
+body {
+    background-color: #f4f4f9;
+    font-family: 'Arial', sans-serif;
+    margin: 0;
+    padding: 0;
+    text-align: center;
+}
+
+/* 見出し */
+h1 {
+    color: #333;
+    margin-top: 20px;
+    font-size: 36px;
+}
+
+/* ゲーム一覧のスタイル */
+.game-list {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-top: 40px;
+    padding: 0;
+}
+
+/* ゲームカードのスタイル */
+.game-card {
+    background-color: white;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    margin: 20px;
+    width: 300px;
+    padding: 20px;
+    text-align: left;
+    transition: transform 0.2s;
+}
+
+.game-card:hover {
+    transform: translateY(-10px);
+}
+
+.game-image {
+    width: 100%;
+    height: auto;
+    border-radius: 8px;
+}
+
+.game-title {
+    font-size: 24px;
+    margin-top: 15px;
+    color: #333;
+}
+
+.game-description {
+    font-size: 16px;
+    margin-top: 10px;
+    color: #666;
+}
+
+.game-link {
+    display: inline-block;
+    margin-top: 15px;
+    padding: 10px 15px;
+    background-color: #007BFF;
+    color: white;
+    border-radius: 4px;
+    text-decoration: none;
+    font-size: 16px;
+}
+
+.game-link:hover {
+    background-color: #0056b3;
+}
+
+/* メディアクエリ：モバイル向け調整 */
+@media screen and (max-width: 600px) {
+    .game-card {
+        width: 90%;
+    }
+}
