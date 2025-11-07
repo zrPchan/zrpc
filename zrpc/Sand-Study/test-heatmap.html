@@ -106,17 +106,29 @@
       </div>
     </details>
 
-    <div class="canvas-wrapper">
-        <section id="charts" class="container-heatmap">
-          <canvas id="moodChart"></canvas>
-          <canvas id="effortChart" class="mt-16"></canvas>
-        </section>
-      </div>
+    <!-- 日別の瓶一覧（history.js が #bottleList に描画します） -->
+    <section id="bottleList" class="bottle-list container-720 mt-12"></section>
 
-      <div class="debug-info" id="debugInfo">
-        <p>ここはテスト用の履歴ページです。下のフォームでログを追加し、グラフが更新されることを確認してください。</p>
-      </div>
+    <!-- ヒートマップ: 日別一覧の下に2つ配置 -->
+    <div class="canvas-wrapper">
+      <section id="charts" class="container-heatmap">
+        <div class="heatmaps">
+          <div class="heatmap-card">
+            <div class="heatmap-title">Mood 頻度</div>
+            <canvas id="moodChart" aria-label="Mood heatmap"></canvas>
+          </div>
+          <div class="heatmap-card">
+            <div class="heatmap-title">Effort 頻度</div>
+            <canvas id="effortChart" aria-label="Effort heatmap"></canvas>
+          </div>
+        </div>
+      </section>
     </div>
+
+    <div class="debug-info" id="debugInfo">
+      <p>ここはテスト用の履歴ページです。下のフォームでログを追加し、グラフが更新されることを確認してください。</p>
+    </div>
+  </div>
 
     <!-- Reuse shared history rendering logic -->
     <script type="module" src="history.js?v=28"></script>
