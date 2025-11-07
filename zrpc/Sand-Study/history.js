@@ -60,7 +60,7 @@ function aggregateHourly(entries){
   return {avgMood, avgEff, counts, dailyHourlyMoodFreq, dailyHourlyEffFreq};
 }
 
-function renderChart(canvasId, label, data, freqData, startDate, endDate){
+function renderChart(canvasId, label, freqData, startDate, endDate){
   const canvas = document.getElementById(canvasId);
   if(!canvas){ console.warn('Canvas not found', canvasId); return; }
   const ctx = canvas.getContext('2d');
@@ -235,8 +235,8 @@ document.addEventListener('DOMContentLoaded', ()=>{
       return;
     }
     const agg = aggregateHourly(entries);
-    renderChart('moodChart','Mood 頻度', agg.avgMood.map(v=> v===null? null: Number(v.toFixed(2))), agg.dailyHourlyMoodFreq, s, e);
-    renderChart('effortChart','Effort 頻度', agg.avgEff.map(v=> v===null? null: Number(v.toFixed(2))), agg.dailyHourlyEffFreq, s, e);
+    renderChart('moodChart','Mood 頻度', agg.dailyHourlyMoodFreq, s, e);
+    renderChart('effortChart','Effort 頻度', agg.dailyHourlyEffFreq, s, e);
     renderBottleList(s,e);
     // attach csv export
     document.getElementById('exportCsv').onclick = ()=> exportCsv(entries);
