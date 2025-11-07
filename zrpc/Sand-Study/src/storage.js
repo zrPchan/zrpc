@@ -1,5 +1,11 @@
 // storage.js - storage helpers for Sand Study (localStorage wrapper)
-export function keyDay(d = new Date()){ return d.toISOString().slice(0,10); }
+export function keyDay(d = new Date()){ 
+  // Use local timezone instead of UTC for Japanese users
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
 
 export function loadCumBase(){ const base = localStorage.getItem("cum_base"); return base ? +base : 0; }
 
