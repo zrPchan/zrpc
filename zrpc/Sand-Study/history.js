@@ -362,6 +362,18 @@ document.addEventListener('DOMContentLoaded', ()=>{
     existing.push(debugEntry);
     localStorage.setItem(tasksKey, JSON.stringify(existing));
     
+    // Also update daily summary so bottle list shows the new entry
+    try{
+      const dailyKey = keyDailyForDay(dateStr);
+      const rawDaily = localStorage.getItem(dailyKey) || '{}';
+      let dailyObj = {};
+      try{ dailyObj = JSON.parse(rawDaily) || {}; }catch(e){ dailyObj = {}; }
+      dailyObj.bottlesToday = (dailyObj.bottlesToday || 0) + 1;
+      dailyObj.layerTotal = (dailyObj.layerTotal || 0) + (layer || 0);
+      dailyObj.lastUpdated = new Date().toISOString();
+      localStorage.setItem(dailyKey, JSON.stringify(dailyObj));
+    }catch(err){ console.warn('Failed to update daily summary', err); }
+    
     // Update status
     const statusEl = document.getElementById('debugStatus');
     if(statusEl){

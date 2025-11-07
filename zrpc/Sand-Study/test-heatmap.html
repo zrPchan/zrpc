@@ -56,15 +56,22 @@
 </head>
 <body>
   <div class="container">
-    <h1>履歴と分析</h1>
-  <p class="text-muted page-subtitle">日別の履歴とヒートマップによる分析を表示します。</p>
+    <!-- App header with actions -->
+    <header class="app-header">
+      <div class="app-title">
+        <h1>履歴と分析</h1>
+        <p class="text-muted page-subtitle">日別の履歴とヒートマップによる分析を表示します。</p>
+      </div>
 
-    <div class="history-controls text-center mt-8">
-      <label>開始日 <input id="startDate" type="date"></label>
-      <label>終了日 <input id="endDate" type="date"></label>
-      <button id="drawBtn" type="button">描画</button>
-      <button id="exportCsv" type="button">CSV エクスポート</button>
-    </div>
+      <div class="app-actions">
+        <div class="history-controls">
+          <label>開始日 <input id="startDate" type="date"></label>
+          <label>終了日 <input id="endDate" type="date"></label>
+          <button id="drawBtn" class="btn-primary">描画</button>
+          <button id="exportCsv" class="btn-outline">CSV エクスポート</button>
+        </div>
+      </div>
+    </header>
 
     <!-- デバッグ用ログ追加 -->
     <details class="debug-panel text-center mt-8">
@@ -90,7 +97,7 @@
           <label>レイヤー数:</label>
           <input id="debugLayer" type="number" min="0" value="1">
         </div>
-        <div style="text-align:center;margin-top:6px;">
+        <div class="debug-add-wrap">
           <button id="addDebugLog" type="button">ログ追加</button>
         </div>
         <div id="debugStatus"></div>

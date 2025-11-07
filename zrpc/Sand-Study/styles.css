@@ -444,6 +444,30 @@ button:disabled{opacity:0.5;cursor:not-allowed}
 /* Heading utilities for test-heatmap page */
 .page-subtitle{text-align:center;margin-top:6px;color:var(--muted)}
 .section-heading{ text-align:center;font-weight:700;margin-bottom:8px }
+
+/* App header */
+.app-header{display:flex;flex-direction:column;gap:12px;align-items:stretch;justify-content:space-between;padding:18px;background:linear-gradient(180deg, rgba(255,255,255,0.8), rgba(250,250,255,0.6));border-radius:14px;box-shadow:0 8px 30px rgba(9,30,66,0.04);margin-bottom:14px}
+.app-header .app-title h1{margin:0;font-size:22px}
+.app-header .app-title p{margin:4px 0 0 0}
+.app-actions{display:flex;justify-content:flex-end;gap:12px;align-items:center}
+.history-controls{display:flex;gap:8px;align-items:center}
+.history-controls label{display:flex;gap:6px;align-items:center;font-size:13px}
+
+/* Modernize buttons a bit more */
+.btn-primary{background:linear-gradient(135deg,#4f46e5,#06b6d4);color:white;padding:10px 14px;border-radius:10px;border:none;box-shadow:0 8px 24px rgba(15,23,42,0.08)}
+.btn-outline{background:transparent;border:1px solid rgba(15,23,42,0.06);color:#0f172a;padding:10px 12px;border-radius:10px}
+.btn-primary:hover{transform:translateY(-2px)}
+.btn-outline:hover{background:rgba(15,23,42,0.02)}
+
+/* Debug add button wrapper */
+.debug-add-wrap{display:flex;justify-content:center;margin-top:6px}
+.debug-add-wrap #addDebugLog{padding:8px 14px;border-radius:8px;background:linear-gradient(135deg,#3b82f6,#2563eb);color:#fff;border:none}
+
+/* Make container background subtle */
+.container{background:linear-gradient(180deg,#ffffff,#fbfdff)}
+
+/* Slight spacing tweak for page content */
+.container > h1{margin-bottom:4px}
 #logs h4{text-align:center;margin-top:8px}
 
 /* Truncate warning actions (used in modal) */
