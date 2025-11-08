@@ -50,12 +50,25 @@
       display: flex;
       justify-content: center;
     }
+    /* Arrange the control rows vertically; each .controls-row is a horizontal row. */
     .history-controls {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+    }
+    /* Each controls-row lays out its items horizontally and wraps if needed. */
+    .controls-row {
       display: flex;
       gap: 12px;
       align-items: center;
       justify-content: center;
       flex-wrap: wrap;
+    }
+    .preset-row {
+      gap: 8px;
     }
     h1 {
       text-align: center;
@@ -172,6 +185,7 @@
 
       <div class="app-actions">
         <div class="history-controls">
+          <!---->
           <!-- Row 1: date inputs + draw -->
           <div class="controls-row">
             <label>開始日 <input id="startDate" type="date"></label>
@@ -183,7 +197,6 @@
           <div id="dateRangeControls" class="controls-row preset-row">
             <button id="p-today" type="button" class="preset-btn">今日</button>
             <button id="p-yesterday" type="button" class="preset-btn">昨日</button>
-            <button id="p-7" type="button" class="preset-btn">過去7日</button>
             <button id="p-week" type="button" class="preset-btn">今週</button>
             <button id="p-month" type="button" class="preset-btn">今月</button>
           </div>
@@ -193,7 +206,7 @@
             <label for="exportFormat">形式:</label>
             <select id="exportFormat">
               <option value="csv">CSV</option>
-              <option value="md">Obsidian (MD)</option>
+              <option value="md">MD</option>
             </select>
             <button id="exportCsv" class="btn-outline">エクスポート</button>
           </div>
