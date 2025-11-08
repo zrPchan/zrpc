@@ -228,13 +228,16 @@
     <!-- ヒートマップ: 日別一覧の下に2つ配置 -->
     <div class="canvas-wrapper">
       <section id="charts" class="container-heatmap">
+        <!-- Main heading that groups both heatmaps -->
+        <h2 class="heatmap-main-title">頻度ヒートマップ</h2>
         <div class="heatmaps">
           <div class="heatmap-card">
-            <div class="heatmap-title">Mood 頻度</div>
+            <!-- Each graph keeps its own subheading -->
+            <h3 class="heatmap-title">Mood 頻度</h3>
             <canvas id="moodChart" aria-label="Mood heatmap"></canvas>
           </div>
           <div class="heatmap-card">
-            <div class="heatmap-title">Effort 頻度</div>
+            <h3 class="heatmap-title">Effort 頻度</h3>
             <canvas id="effortChart" aria-label="Effort heatmap"></canvas>
           </div>
         </div>
