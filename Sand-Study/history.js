@@ -339,12 +339,13 @@ document.addEventListener('DOMContentLoaded', ()=>{
   document.getElementById('addDebugLog')?.addEventListener('click', () => {
     const dateStr = document.getElementById('debugDate')?.value;
     const timeStr = document.getElementById('debugTime')?.value || '12:00';
-    const m = parseInt(document.getElementById('debugM')?.value || '3');
-    const e = parseInt(document.getElementById('debugE')?.value || '3');
+  const m = parseInt(document.getElementById('debugM')?.value || '0');
+  const e = parseInt(document.getElementById('debugE')?.value || '0');
     const layer = parseInt(document.getElementById('debugLayer')?.value || '1');
     
-    if(!dateStr){ alert('日付を入力してください'); return; }
-    if(m < 1 || m > 5 || e < 1 || e > 5){ alert('M値とE値は1-5の範囲で入力してください'); return; }
+  if(!dateStr){ alert('日付を入力してください'); return; }
+  // New valid range: -2 .. 2
+  if(m < -2 || m > 2 || e < -2 || e > 2){ alert('M値とE値は-2〜2の範囲で入力してください'); return; }
     
     // Create timestamp from date + time
     const [year, month, day] = dateStr.split('-').map(Number);
