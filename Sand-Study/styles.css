@@ -481,6 +481,19 @@ button:disabled{opacity:0.5;cursor:not-allowed}
   .heatmap-main-title{max-width:var(--content-max-width)}
 }
 
+/* Center the bottle-list and its scrollbar on larger screens so the scrollbar sits next to the cards (like 学習ログ) */
+@media (min-width: 900px){
+  .bottle-list{
+    max-width: 33%;
+    margin-left: auto;
+    margin-right: auto;
+    /* keep existing internal layout (column) */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+}
+
 .muted{ color:var(--muted) }
 .text-muted{ color:var(--text-strong) }
 .overlay[aria-hidden="false"]{display:flex}
