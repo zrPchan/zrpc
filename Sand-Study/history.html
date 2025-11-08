@@ -172,10 +172,31 @@
 
       <div class="app-actions">
         <div class="history-controls">
-          <label>開始日 <input id="startDate" type="date"></label>
-          <label>終了日 <input id="endDate" type="date"></label>
-          <button id="drawBtn" class="btn-primary">描画</button>
-          <button id="exportCsv" class="btn-outline">エクスポート</button>
+          <!-- Row 1: date inputs + draw -->
+          <div class="controls-row">
+            <label>開始日 <input id="startDate" type="date"></label>
+            <label>終了日 <input id="endDate" type="date"></label>
+            <button id="drawBtn" class="btn-primary">描画</button>
+          </div>
+
+          <!-- Row 2: presets (today/yesterday/this week/this month) -->
+          <div id="dateRangeControls" class="controls-row preset-row">
+            <button id="p-today" type="button" class="preset-btn">今日</button>
+            <button id="p-yesterday" type="button" class="preset-btn">昨日</button>
+            <button id="p-7" type="button" class="preset-btn">過去7日</button>
+            <button id="p-week" type="button" class="preset-btn">今週</button>
+            <button id="p-month" type="button" class="preset-btn">今月</button>
+          </div>
+
+          <!-- Row 3: format select + export -->
+          <div class="controls-row">
+            <label for="exportFormat">形式:</label>
+            <select id="exportFormat">
+              <option value="csv">CSV</option>
+              <option value="md">Obsidian (MD)</option>
+            </select>
+            <button id="exportCsv" class="btn-outline">エクスポート</button>
+          </div>
         </div>
       </div>
     </header>
