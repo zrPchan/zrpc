@@ -398,6 +398,15 @@ button:disabled{opacity:0.5;cursor:not-allowed}
 .mt-16{ margin-top:16px }
 .mt-18{ margin-top:18px }
   .container-720{ max-width:var(--content-max-width); margin:18px auto }
+
+/* Date range controls (history page) */
+.date-range-controls{ display:flex; gap:12px; align-items:center; justify-content:flex-start; margin:12px auto 18px; max-width:720px }
+.date-range-controls .preset-wrap{ display:flex; gap:8px }
+.preset-btn{ padding:6px 10px; border-radius:8px; border:1px solid var(--border); background:linear-gradient(180deg,#ffffff,#fbfbfb); cursor:pointer; font-weight:600 }
+.preset-btn:hover{ transform:translateY(-1px); box-shadow:0 6px 16px rgba(0,0,0,0.04) }
+.date-range-label{ color:var(--muted); font-weight:600; margin-left:8px }
+
+@media (max-width:600px){ .date-range-controls{ flex-direction:column; align-items:flex-start } }
 .container-heatmap{
   max-width: 3000px;
   margin: 18px auto;
