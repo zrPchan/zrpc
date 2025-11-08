@@ -7,6 +7,8 @@ const AUTO_SAVE_TIME = 30; // seconds
 const MAX_FIELD = 50; // max chars per field (taskname / insight / nexttask)
 let sessionStart = null; // epoch seconds or null
 let today = storage.loadToday();
+// track last level used for theme-unlock detection
+window._lastThemeUnlockLevel = Math.floor((today && today.bottlesCum ? Math.floor((today.bottlesCum||0)/2) : 0));
 let countdownId = null;
 let countdownRemaining = AUTO_SAVE_TIME;
 let timerIntervalId = null; // legacy; kept for compatibility while migrating
@@ -635,7 +637,19 @@ function applyLayer(u){
 function render(){
   document.getElementById("todayBottles").textContent = String(today.bottlesToday || 0);
   document.getElementById("cumBottles").textContent = String(today.bottlesCum || 0);
-  document.getElementById("level").textContent = String(Math.floor((today.bottlesCum||0)/2));
+  // compute level from internal user data (bottlesCum) for robust unlock checks
+  const newLevel = Math.floor((today.bottlesCum||0)/2);
+  const levelEl = document.getElementById("level");
+  if(levelEl) levelEl.textContent = String(newLevel);
+  // detect unlock thresholds and animate newly unlocked themes
+  try{
+    const prevLevel = Number(window._lastThemeUnlockLevel || 0);
+    if(newLevel > prevLevel){
+      // handle unlocks for any themes whose unlock is in (prevLevel, newLevel]
+      try{ handleThemeUnlocks(prevLevel, newLevel); }catch(e){}
+    }
+    window._lastThemeUnlockLevel = newLevel;
+  }catch(e){ /* noop */ }
   // render layered sand: up to 10 layers, each 10% of bottle height
   const layerWithin = (today.layerTotal || 0) % BOTTLE_CAP; // 0..99
   const fullLayers = Math.floor(layerWithin / 10); // number of full 10% layers
@@ -730,6 +744,39 @@ function render(){
     }
     sandEl.innerHTML = layers.join('');
   }
+}
+
+// When level crosses unlock thresholds, reveal themes and animate swatches
+function handleThemeUnlocks(prevLevel, newLevel){
+  try{
+    const newlyUnlocked = (THEMES || []).filter(t => (t.unlock||0) > prevLevel && (t.unlock||0) <= newLevel);
+    newlyUnlocked.forEach(t => {
+      const id = t.id;
+      const name = t.name || id;
+      // update existing swatch if theme picker is open or element exists
+      try{
+        const sel = document.querySelector(`.theme-swatch[data-theme="${id}"]`);
+        if(sel){
+          sel.classList.remove('locked');
+          sel.removeAttribute('data-unlock');
+          sel.removeAttribute('aria-disabled');
+          // animate: add unlock class then remove after animation
+          sel.classList.add('theme-unlocked');
+          // ensure focusable/interactable
+          sel.disabled = false;
+          setTimeout(()=>{ try{ sel.classList.remove('theme-unlocked'); }catch(e){} }, 1500);
+        }
+      }catch(e){}
+      // global notification for user
+      try{ showToast(`${name} テーマを解放しました！` , 2500); }catch(e){}
+      // small celebratory effect on body (glow) for a short moment
+      try{
+        const body = document.documentElement || document.body;
+        body.classList.add('theme-unlock-glow');
+        setTimeout(()=>{ try{ body.classList.remove('theme-unlock-glow'); }catch(e){} }, 1000);
+      }catch(e){}
+    });
+  }catch(e){ console.warn('handleThemeUnlocks error', e); }
 }
 
 function startCountdown(sec){
@@ -937,11 +984,10 @@ function applyThemeId(id){
 
 function renderThemeGrid(){
   const grid = document.getElementById('themeGrid'); if(!grid) return;
-  // determine current user level (read from UI if available)
+  // determine current user level from internal data (today.bottlesCum) so picker reflects unlocks even when overlay opened before UI render
   let level = 0;
   try{
-    const lvlEl = document.getElementById('level');
-    if(lvlEl) level = Number((lvlEl.textContent || '0').trim()) || 0;
+    level = Math.floor((today && today.bottlesCum ? (today.bottlesCum||0) : (storage.loadCumBase()||0)) / 2) || 0;
   }catch(e){ level = 0; }
 
   grid.innerHTML = THEMES.map(t => {

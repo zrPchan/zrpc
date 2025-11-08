@@ -665,6 +665,18 @@ button:disabled{opacity:0.5;cursor:not-allowed}
 .theme-swatch:hover{transform:translateY(-4px);box-shadow:0 10px 30px rgba(34,20,35,0.08)}
 .theme-swatch.locked{opacity:0.5;cursor:not-allowed;transform:none}
 .theme-swatch .swatch-lock{font-size:12px;margin-top:6px;color:var(--muted)}
+
+/* Unlock animation: small bounce + glow to celebrate unlocking a theme */
+.theme-swatch.theme-unlocked{animation: unlock-bounce 900ms cubic-bezier(.22,.9,.3,1); box-shadow: 0 10px 30px rgba(99,102,241,0.18); transform-origin:center}
+@keyframes unlock-bounce{
+  0%{ transform: scale(1); filter: drop-shadow(0 0 0 rgba(0,0,0,0)); }
+  40%{ transform: scale(1.12); }
+  60%{ transform: scale(0.98); }
+  100%{ transform: scale(1); }
+}
+
+/* brief page glow when unlocking */
+.theme-unlock-glow{ box-shadow: inset 0 0 120px rgba(255,255,255,0.06); }
 .swatch-sample{width:48px;height:36px;border-radius:6px;display:block;border:1px solid rgba(0,0,0,0.04)}
 .swatch-label{font-size:12px;color:var(--muted);text-align:center}
 
