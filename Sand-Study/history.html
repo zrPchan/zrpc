@@ -237,6 +237,19 @@
     </div>
   </div>
 
+    <!-- Apply saved UI theme (so history page reflects chosen theme even when opened directly) -->
+    <script>
+      (function(){
+        try{
+          var THEME_KEY = 'uiTheme:v1';
+          var saved = null;
+          try{ saved = localStorage.getItem(THEME_KEY); }catch(e){}
+          if(!saved) saved = 'sand';
+          var cls = 'theme-' + String(saved || 'sand');
+          try{ document.documentElement.classList.add(cls); }catch(e){}
+        }catch(e){ /* noop */ }
+      })();
+    </script>
     <!-- Reuse shared history rendering logic -->
     <script type="module" src="history.js?v=28"></script>
   </body>
