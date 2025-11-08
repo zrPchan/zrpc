@@ -18,6 +18,9 @@
   --content-max-width: 1200px;
   --bg-1: #fff7fb; /* page gradient start */
   --bg-2: #fffcf5; /* page gradient end */
+  /* Heatmap gradient defaults (can be overridden by theme classes) */
+  --heatmap-1: #667eea;
+  --heatmap-2: #764ba2;
   --card: #fffefc; /* card / panel */
   --muted: #7b6b7b; /* muted text */
   --accent: #f6a4d9; /* primary accent */
@@ -59,6 +62,11 @@
 }
 
 body{font-family:'Baloo 2','Inter',system-ui,-apple-system,'Segoe UI',Roboto,Helvetica,Arial; margin:18px; color:var(--text); background: linear-gradient(180deg, var(--bg-1), var(--bg-2));}
+/* Heatmap / history unified background class (applied to pages that should use the purple gradient) */
+.bg-heatmap{
+  background: linear-gradient(135deg, var(--heatmap-1, #667eea) 0%, var(--heatmap-2, #764ba2) 100%);
+  min-height: 100vh;
+}
 .stats .big{font-size:30px;font-weight:700}
 .stats .mid{font-size:16px;margin-top:6px;color:var(--muted)}
 .stats .small{font-size:13px;color:var(--muted)}
@@ -531,7 +539,14 @@ button:disabled{opacity:0.5;cursor:not-allowed}
 .debug-add-wrap #addDebugLog{padding:8px 14px;border-radius:8px;background:linear-gradient(135deg,#3b82f6,#2563eb);color:#fff;border:none}
 
 /* Make container background subtle */
-.container{background:linear-gradient(180deg,#ffffff,#fbfdff)}
+.container{
+  background: linear-gradient(180deg,#ffffff,#fbfdff);
+  border-radius: 16px;
+  padding: 28px;
+  max-width: 1100px;
+  margin: 24px auto;
+  box-shadow: 0 30px 80px rgba(16,24,40,0.18);
+}
 
 /* Slight spacing tweak for page content */
 .container > h1{margin-bottom:4px}
@@ -639,12 +654,12 @@ button:disabled{opacity:0.5;cursor:not-allowed}
 .swatch-label{font-size:12px;color:var(--muted);text-align:center}
 
 /* Theme variable classes: each theme sets the core CSS variables used by the app */
-.theme-sand{ --bg-1:#fffaf5; --bg-2:#fff6ec; --card:#fffef8; --muted:#6b5f4a; --accent:#d6b77a; --accent-2:#f3e0bf; --accent-3:#b89258; --sand-1:#fff3df; --sand-2:#d6b77a }
-.theme-red{ --bg-1:#fff6f6; --bg-2:#fff1f1; --card:#ffffff; --muted:#6b4b4b; --accent:#e05a6a; --accent-2:#f6c9cf; --accent-3:#b33a46; --sand-1:#ffd6d9; --sand-2:#e05a6a }
-.theme-blue{ --bg-1:#f6fbff; --bg-2:#eef7ff; --card:#ffffff; --muted:#3b4b5b; --accent:#4a8fe0; --accent-2:#cfe8ff; --accent-3:#2f6fb3; --sand-1:#cfe8ff; --sand-2:#4a8fe0 }
-.theme-green{ --bg-1:#f6fff6; --bg-2:#f0fff0; --card:#ffffff; --muted:#3b6b4b; --accent:#34a853; --accent-2:#cdefd0; --accent-3:#2f8b5a; --sand-1:#cdefd0; --sand-2:#34a853 }
-.theme-pink{ --bg-1:#fff7fb; --bg-2:#fff2f8; --card:#ffffff; --muted:#6b4b5b; --accent:#f47aa6; --accent-2:#ffd6ea; --accent-3:#c04b6b; --sand-1:#ffd6ea; --sand-2:#f47aa6 }
-.theme-silver{ --bg-1:#f7f8fa; --bg-2:#eef0f3; --card:#ffffff; --muted:#55606b; --accent:#9aa6b3; --accent-2:#e6ebf1; --accent-3:#6b7784; --sand-1:#e6ebf1; --sand-2:#9aa6b3 }
+.theme-sand{ --bg-1:#fffaf5; --bg-2:#fff6ec; --card:#fffef8; --muted:#6b5f4a; --accent:#d6b77a; --accent-2:#f3e0bf; --accent-3:#b89258; --sand-1:#fff3df; --sand-2:#d6b77a; --heatmap-1: var(--accent); --heatmap-2: var(--accent-2); }
+.theme-red{ --bg-1:#fff6f6; --bg-2:#fff1f1; --card:#ffffff; --muted:#6b4b4b; --accent:#e05a6a; --accent-2:#f6c9cf; --accent-3:#b33a46; --sand-1:#ffd6d9; --sand-2:#e05a6a; --heatmap-1: var(--accent); --heatmap-2: var(--accent-2); }
+.theme-blue{ --bg-1:#f6fbff; --bg-2:#eef7ff; --card:#ffffff; --muted:#3b4b5b; --accent:#4a8fe0; --accent-2:#cfe8ff; --accent-3:#2f6fb3; --sand-1:#cfe8ff; --sand-2:#4a8fe0; --heatmap-1: var(--accent); --heatmap-2: var(--accent-2); }
+.theme-green{ --bg-1:#f6fff6; --bg-2:#f0fff0; --card:#ffffff; --muted:#3b6b4b; --accent:#34a853; --accent-2:#cdefd0; --accent-3:#2f8b5a; --sand-1:#cdefd0; --sand-2:#34a853; --heatmap-1: var(--accent); --heatmap-2: var(--accent-2); }
+.theme-pink{ --bg-1:#fff7fb; --bg-2:#fff2f8; --card:#ffffff; --muted:#6b4b5b; --accent:#f47aa6; --accent-2:#ffd6ea; --accent-3:#c04b6b; --sand-1:#ffd6ea; --sand-2:#f47aa6; --heatmap-1: var(--accent); --heatmap-2: var(--accent-2); }
+.theme-silver{ --bg-1:#f7f8fa; --bg-2:#eef0f3; --card:#ffffff; --muted:#55606b; --accent:#9aa6b3; --accent-2:#e6ebf1; --accent-3:#6b7784; --sand-1:#e6ebf1; --sand-2:#9aa6b3; --heatmap-1: var(--accent); --heatmap-2: var(--accent-2); }
 
 /* Solid palettes replace pastel/dark sets: stronger, single-hue sand gradients */
 /* removed Solid palettes by user request */

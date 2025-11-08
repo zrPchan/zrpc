@@ -7,10 +7,10 @@
   <link rel="stylesheet" href="styles.css?v=28">
   <style>
     /* Test page specific overrides - モダンデザイン with guaranteed centering */
+    /* body background moved into styles.css .bg-heatmap so multiple pages can share it */
     body {
       margin: 0;
       padding: 20px;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       min-height: 100vh;
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     }
@@ -159,8 +159,9 @@
       margin: 20px auto;
     }
   </style>
+  </style>
 </head>
-<body>
+<body class="bg-heatmap">
   <div class="container">
     <!-- App header with actions -->
     <header class="app-header">

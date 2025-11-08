@@ -30,7 +30,8 @@
   <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;600;800&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
 </head>
-<body>
+<body class="bg-heatmap">
+  <div class="container">
   <!-- Update banner: shown when a new app version / service worker is available -->
   <div id="updateBanner" role="status" aria-live="polite">
     <div class="msg">新しいバージョンがあります。</div>
@@ -284,6 +285,7 @@
       <div class="countdown" id="countdown">30</div>
     </form>
   </dialog>
+  </div>
 
   <script type="module" src="app.js"></script>
   <script>
