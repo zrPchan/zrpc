@@ -1,3 +1,16 @@
+/* ヒートマップ大見出し・各グラフ見出しの中央配置 */
+.heatmap-main-title {
+  text-align: center;
+  margin: 32px auto 24px auto;
+  font-size: 2rem;
+  font-weight: 700;
+}
+.heatmap-title {
+  text-align: center;
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
 :root{
   --bg-1: #fff7fb; /* page gradient start */
   --bg-2: #fffcf5; /* page gradient end */
