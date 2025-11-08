@@ -303,27 +303,36 @@ function computeDailyLayerDeltas(startDate, endDate){
 }
 
 // Render calendar heatmap: rows = weekdays (Mon..Sun), cols = weeks from start to end
-function renderCalendarHeatmap(canvasId, startDate, endDate, deltas){
+// renderCalendarHeatmap(canvasId, startDate, endDate, deltas, weeksArg)
+// If weeksArg is provided, use that many weeks with the rightmost column ending at endDate's week.
+function renderCalendarHeatmap(canvasId, startDate, endDate, deltas, weeksArg){
   const canvas = document.getElementById(canvasId);
   if(!canvas) return;
+  // Determine week grid: if weeksArg provided, show that many weeks ending at endDate's week
+  const end = new Date(endDate);
+  const endDow = end.getDay();
+  const endMonday = new Date(end);
+  const offsetToMondayEnd = (endDow === 0) ? -6 : (1 - endDow);
+  endMonday.setDate(end.getDate() + offsetToMondayEnd);
+  const weeks = Number.isFinite(Number(weeksArg)) && weeksArg > 0 ? Number(weeksArg) : (function(){
+    // default: compute weeks from startDate to endDate
+    const start = new Date(startDate);
+    const startDow = start.getDay();
+    const startMonday = new Date(start);
+    const offsetToMonday = (startDow === 0) ? -6 : (1 - startDow);
+    startMonday.setDate(start.getDate() + offsetToMonday);
+    const diffDays = Math.ceil((endMonday.getTime() - startMonday.getTime()) / (24*3600*1000)) + 1;
+    return Math.max(1, Math.ceil(diffDays / 7));
+  })();
 
-  // Build a start-of-week (Monday) for leftmost column
-  const start = new Date(startDate);
-  const startDow = start.getDay(); // 0=Sun..6=Sat
-  // compute monday of that week
-  const monday = new Date(start);
-  const offsetToMonday = (startDow === 0) ? -6 : (1 - startDow);
-  monday.setDate(start.getDate() + offsetToMonday);
-
-  // number of days in range
-  const days = dateRange(startDate, endDate);
-  const last = new Date(endDate);
-  // compute number of weeks columns
-  const diffDays = Math.ceil(( (new Date(endDate)).getTime() - monday.getTime()) / (24*3600*1000)) + 1;
-  const weeks = Math.ceil(diffDays / 7);
+  // leftmost monday (weeks-1 weeks before endMonday)
+  const monday = new Date(endMonday);
+  monday.setDate(monday.getDate() - (weeks - 1) * 7);
 
   // layout
-  const cellSize = Math.max(12, Math.min(28, Math.floor((window.innerWidth - 320) / Math.max(8, weeks))));
+  // compute cell size to fit 52 weeks across typical widths; min/max bounds keep cells readable
+  const targetWidth = Math.min(window.innerWidth - 160, 1800);
+  const cellSize = Math.max(8, Math.min(28, Math.floor((targetWidth - yLabelsWidth - 24 - weeks * 4) / Math.max(1, weeks))));
   const gutter = 4;
   const yLabelsWidth = 48;
   const width = yLabelsWidth + weeks * (cellSize + gutter) + 24;
