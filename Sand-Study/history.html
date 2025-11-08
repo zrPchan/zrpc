@@ -3,68 +3,240 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>履歴 - Sand Study</title>
+  <title>ヒートマップ中央配置テスト</title>
   <link rel="stylesheet" href="styles.css?v=28">
-  <!-- Chart.js removed - using Canvas API for heatmap -->
+  <style>
+    /* Test page specific overrides - モダンデザイン with guaranteed centering */
+    body {
+      margin: 0;
+      padding: 20px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      background: rgba(255, 255, 255, 0.98);
+      padding: 32px;
+      border-radius: 16px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      -webkit-backdrop-filter: blur(10px);
+      backdrop-filter: blur(10px);
+    }
+    /* Force all sections to center */
+    .app-header,
+    .debug-panel,
+    .section-heading,
+    .bottle-list,
+    .canvas-wrapper {
+      margin-left: auto;
+      margin-right: auto;
+    }
+    .app-header {
+      max-width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    .app-title {
+      text-align: center;
+      width: 100%;
+    }
+    .app-actions {
+      width: 100%;
+      display: flex;
+      justify-content: center;
+    }
+    .history-controls {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    h1 {
+      text-align: center;
+      color: #1a202c;
+      font-weight: 700;
+      font-size: 2rem;
+      margin-bottom: 8px;
+    }
+    h2.section-heading {
+      text-align: center !important;
+      margin: 24px auto 12px auto !important;
+      max-width: 100% !important;
+      width: 100% !important;
+    }
+    /* Bottle list and container width are handled by external stylesheet to keep columns consistent */
+    .canvas-wrapper {
+      /* CRITICAL: 中央配置保証 - 変更禁止 */
+      display: flex !important;
+      justify-content: center !important;
+      align-items: center !important;
+      margin: 30px auto !important;
+      background: transparent !important;
+      padding: 0 !important;
+      width: 100% !important;
+      max-width: 100% !important;
+    }
+    /* Ensure heatmap containers don't break centering */
+    /* Let external CSS control the desktop max-width so columns can match */
+    .container-heatmap {
+      width: 100%;
+      max-width: 100%;
+      margin: 0 auto;
+      padding: 0 16px;
+      box-sizing: border-box;
+    }
+    .heatmaps {
+      width: 100%;
+      max-width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 24px;
+      margin: 0 auto;
+    }
+    .heatmap-card {
+      width: 100% !important;
+      max-width: 100% !important;
+      background: white !important;
+      border-radius: 12px !important;
+      padding: 20px !important;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.08) !important;
+      border: 1px solid rgba(102, 126, 234, 0.1) !important;
+      display: flex !important;
+      flex-direction: column !important;
+      align-items: center !important;
+      margin: 0 auto !important;
+      box-sizing: border-box !important;
+    }
+    .heatmap-title {
+      font-weight: 600;
+      color: #4a5568;
+      margin-bottom: 12px;
+      font-size: 1.1rem;
+      text-align: center;
+      width: 100%;
+    }
+    canvas {
+      display: block !important;
+      margin-left: auto !important;
+      margin-right: auto !important;
+      border: none !important;
+      background: white !important;
+      border-radius: 8px !important;
+      max-width: 100% !important;
+      position: relative !important;
+      left: 0 !important;
+      right: 0 !important;
+      transform: translateX(0) !important;
+    }
+    .heatmap-card canvas {
+      display: block !important;
+      margin-left: auto !important;
+      margin-right: auto !important;
+      max-width: 100% !important;
+    }
+    .debug-info {
+      font-family: 'Courier New', monospace;
+      font-size: 13px;
+      margin: 20px auto;
+      padding: 16px;
+      background: rgba(102, 126, 234, 0.05);
+      border-radius: 8px;
+      border-left: 4px solid #667eea;
+      color: #4a5568;
+      max-width: 900px;
+      text-align: center;
+    }
+    /* Debug panel centering */
+    .debug-panel {
+      max-width: 600px;
+      margin: 20px auto;
+    }
+  </style>
 </head>
 <body>
-  <main>
-    <h2 class="text-center">履歴と分析</h2>
-    <div class="history-controls text-center mt-8">
-      <label>開始日 <input id="startDate" type="date"></label>
-      <label>終了日 <input id="endDate" type="date"></label>
-      <button id="drawBtn" type="button">描画</button>
-      <button id="exportCsv" type="button">CSV エクスポート</button>
-    </div>
-    
+  <div class="container">
+    <!-- App header with actions -->
+    <header class="app-header">
+      <div class="app-title">
+        <h1>履歴と分析</h1>
+        <p class="text-muted page-subtitle">日別の履歴とヒートマップによる分析を表示します。</p>
+      </div>
+
+      <div class="app-actions">
+        <div class="history-controls">
+          <label>開始日 <input id="startDate" type="date"></label>
+          <label>終了日 <input id="endDate" type="date"></label>
+          <button id="drawBtn" class="btn-primary">描画</button>
+          <button id="exportCsv" class="btn-outline">CSV エクスポート</button>
+        </div>
+      </div>
+    </header>
+
     <!-- デバッグ用ログ追加 -->
-    <details class="debug-panel text-center mt-8" style="max-width:600px;margin:20px auto;padding:16px;background:rgba(59,130,246,0.1);border-radius:8px;">
-      <summary style="cursor:pointer;font-weight:bold;color:#3b82f6;">🛠️ デバッグ: ログ手動追加</summary>
-      <div style="margin-top:16px;display:grid;gap:12px;">
-        <div style="display:grid;grid-template-columns:100px 1fr;gap:8px;align-items:center;">
+    <details class="debug-panel text-center mt-8">
+      <summary>🛠️ デバッグ: ログ手動追加</summary>
+      <div class="grid-row">
+        <div class="row">
           <label>日付:</label>
-          <input id="debugDate" type="date" style="padding:6px;border-radius:4px;border:1px solid #ccc;">
+          <input id="debugDate" type="date">
         </div>
-        <div style="display:grid;grid-template-columns:100px 1fr;gap:8px;align-items:center;">
+        <div class="row">
           <label>時刻:</label>
-          <input id="debugTime" type="time" value="12:00" style="padding:6px;border-radius:4px;border:1px solid #ccc;">
+          <input id="debugTime" type="time" value="12:00">
         </div>
-        <div style="display:grid;grid-template-columns:100px 1fr;gap:8px;align-items:center;">
+        <div class="row">
           <label>M値 (1-5):</label>
-          <input id="debugM" type="number" min="1" max="5" value="3" style="padding:6px;border-radius:4px;border:1px solid #ccc;">
+          <input id="debugM" type="number" min="1" max="5" value="3">
         </div>
-        <div style="display:grid;grid-template-columns:100px 1fr;gap:8px;align-items:center;">
+        <div class="row">
           <label>E値 (1-5):</label>
-          <input id="debugE" type="number" min="1" max="5" value="3" style="padding:6px;border-radius:4px;border:1px solid #ccc;">
+          <input id="debugE" type="number" min="1" max="5" value="3">
         </div>
-        <div style="display:grid;grid-template-columns:100px 1fr;gap:8px;align-items:center;">
+        <div class="row">
           <label>レイヤー数:</label>
-          <input id="debugLayer" type="number" min="0" value="1" style="padding:6px;border-radius:4px;border:1px solid #ccc;">
+          <input id="debugLayer" type="number" min="0" value="1">
         </div>
-        <button id="addDebugLog" type="button" style="margin-top:8px;padding:8px 16px;background:#3b82f6;color:white;border:none;border-radius:6px;cursor:pointer;font-weight:bold;">
-          ログ追加
-        </button>
-        <div id="debugStatus" style="margin-top:8px;font-size:0.9rem;color:#666;"></div>
+        <div class="debug-add-wrap">
+          <button id="addDebugLog" type="button">ログ追加</button>
+        </div>
+        <div id="debugStatus"></div>
       </div>
     </details>
-    
-    <div id="historyStatus" class="text-center mt-8 muted"></div>
 
-    <section id="charts" class="container-heatmap">
-      <canvas id="moodChart"></canvas>
-      <canvas id="effortChart" class="mt-16"></canvas>
-    </section>
+  <!-- 日別の瓶一覧（history.js が #bottleList に描画します） -->
+  <h2 class="mt-12 section-heading">日別の瓶一覧</h2>
+  <section id="bottleList" class="bottle-list container-720 mt-0"></section>
 
-    <section id="bottles" class="container-720">
-      <h3>日別の瓶一覧</h3>
-      <div id="bottleList"></div>
-    </section>
-
-    <div class="text-center mt-18">
-      <a href="index.html">← メインに戻る</a>
+    <!-- ヒートマップ: 日別一覧の下に2つ配置 -->
+    <!-- Main heading moved to the top of the heatmap area -->
+    <h2 class="heatmap-main-title">頻度ヒートマップ</h2>
+    <div class="canvas-wrapper">
+      <section id="charts" class="container-heatmap">
+        <div class="heatmaps">
+          <div class="heatmap-card">
+            <!-- Each graph keeps its own subheading -->
+            <canvas id="moodChart" aria-label="Mood heatmap"></canvas>
+          </div>
+          <div class="heatmap-card">
+            <canvas id="effortChart" aria-label="Effort heatmap"></canvas>
+          </div>
+        </div>
+      </section>
     </div>
-  </main>
 
-  <script type="module" src="history.js?v=28"></script>
-</body>
-</html>
+    <div class="debug-info" id="debugInfo">
+      <p>ここはテスト用の履歴ページです。下のフォームでログを追加し、グラフが更新されることを確認してください。</p>
+    </div>
+  </div>
+
+    <!-- Reuse shared history rendering logic -->
+    <script type="module" src="history.js?v=28"></script>
+  </body>
+  </html>

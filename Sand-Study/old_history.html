@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>履歴 - Sand Study</title>
+  <link rel="stylesheet" href="styles.css?v=28">
+  <!-- Chart.js removed - using Canvas API for heatmap -->
+</head>
+<body>
+  <main>
+    <h2 class="text-center">履歴と分析</h2>
+    <div class="history-controls text-center mt-8">
+      <label>開始日 <input id="startDate" type="date"></label>
+      <label>終了日 <input id="endDate" type="date"></label>
+      <button id="drawBtn" type="button">描画</button>
+      <button id="exportCsv" type="button">CSV エクスポート</button>
+    </div>
+    
+    <!-- デバッグ用ログ追加 -->
+    <details class="debug-panel text-center mt-8" style="max-width:600px;margin:20px auto;padding:16px;background:rgba(59,130,246,0.1);border-radius:8px;">
+      <summary style="cursor:pointer;font-weight:bold;color:#3b82f6;">🛠️ デバッグ: ログ手動追加</summary>
+      <div style="margin-top:16px;display:grid;gap:12px;">
+        <div style="display:grid;grid-template-columns:100px 1fr;gap:8px;align-items:center;">
+          <label>日付:</label>
+          <input id="debugDate" type="date" style="padding:6px;border-radius:4px;border:1px solid #ccc;">
+        </div>
+        <div style="display:grid;grid-template-columns:100px 1fr;gap:8px;align-items:center;">
+          <label>時刻:</label>
+          <input id="debugTime" type="time" value="12:00" style="padding:6px;border-radius:4px;border:1px solid #ccc;">
+        </div>
+        <div style="display:grid;grid-template-columns:100px 1fr;gap:8px;align-items:center;">
+          <label>M値 (1-5):</label>
+          <input id="debugM" type="number" min="1" max="5" value="3" style="padding:6px;border-radius:4px;border:1px solid #ccc;">
+        </div>
+        <div style="display:grid;grid-template-columns:100px 1fr;gap:8px;align-items:center;">
+          <label>E値 (1-5):</label>
+          <input id="debugE" type="number" min="1" max="5" value="3" style="padding:6px;border-radius:4px;border:1px solid #ccc;">
+        </div>
+        <div style="display:grid;grid-template-columns:100px 1fr;gap:8px;align-items:center;">
+          <label>レイヤー数:</label>
+          <input id="debugLayer" type="number" min="0" value="1" style="padding:6px;border-radius:4px;border:1px solid #ccc;">
+        </div>
+        <button id="addDebugLog" type="button" style="margin-top:8px;padding:8px 16px;background:#3b82f6;color:white;border:none;border-radius:6px;cursor:pointer;font-weight:bold;">
+          ログ追加
+        </button>
+        <div id="debugStatus" style="margin-top:8px;font-size:0.9rem;color:#666;"></div>
+      </div>
+    </details>
+    
+    <div id="historyStatus" class="text-center mt-8 muted"></div>
+
+    <section id="charts" class="container-heatmap">
+      <canvas id="moodChart"></canvas>
+      <canvas id="effortChart" class="mt-16"></canvas>
+    </section>
+
+    <section id="bottles" class="container-720">
+      <h3>日別の瓶一覧</h3>
+      <div id="bottleList"></div>
+    </section>
+
+    <div class="text-center mt-18">
+      <a href="index.html">← メインに戻る</a>
+    </div>
+  </main>
+
+  <script type="module" src="history.js?v=28"></script>
+</body>
+</html>
