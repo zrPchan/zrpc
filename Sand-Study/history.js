@@ -393,8 +393,53 @@ document.addEventListener('DOMContentLoaded', ()=>{
   
   // デバッグ用ログ追加機能
   const debugDateEl = document.getElementById('debugDate');
-  if(debugDateEl) debugDateEl.value = today;
-  
+  (function addDateRangeControls(){
+    if(!startEl || !endEl) return;
+    if(document.getElementById('dateRangeControls')) return; // 既に追加済み
+
+    const container = document.createElement('div');
+    container.id = 'dateRangeControls';
+    container.className = 'date-range-controls';
+
+    const presets = [
+      {id:'p-today', label:'今日', fn:()=>({s: today, e: today})},
+      {id:'p-yesterday', label:'昨日', fn:()=>{ const d=new Date(today); d.setDate(d.getDate()-1); const s=d.toISOString().slice(0,10); return {s,e:s}; }},
+      {id:'p-7', label:'過去7日', fn:()=>{ const e=new Date(today); const s=new Date(today); s.setDate(s.getDate()-6); return {s: s.toISOString().slice(0,10), e: e.toISOString().slice(0,10)} }},
+      {id:'p-week', label:'今週', fn:()=>{ const now=new Date(today); const dow=now.getDay(); const s=new Date(now); s.setDate(s.getDate() - dow + (dow===0? -6:1)); const e=new Date(s); e.setDate(s.getDate()+6); return {s: s.toISOString().slice(0,10), e: e.toISOString().slice(0,10)} }},
+      {id:'p-month', label:'今月', fn:()=>{ const now=new Date(today); const s=new Date(now.getFullYear(), now.getMonth(), 1); const e=new Date(now.getFullYear(), now.getMonth()+1, 0); return {s: s.toISOString().slice(0,10), e: e.toISOString().slice(0,10)} }},
+    ];
+
+    const btnWrap = document.createElement('div'); btnWrap.className = 'preset-wrap';
+    presets.forEach(p=>{
+      const b = document.createElement('button'); b.id = p.id; b.type='button'; b.className='preset-btn'; b.textContent = p.label;
+      b.addEventListener('click', ()=>{
+        try{
+          const r = p.fn();
+          startEl.value = r.s; endEl.value = r.e || r.s;
+          // trigger render
+          setTimeout(()=>{ if(typeof renderAll === 'function') renderAll(); }, 0);
+        }catch(err){ console.warn('preset error', err); }
+      });
+      btnWrap.appendChild(b);
+    });
+
+    const rangeLabel = document.createElement('div'); rangeLabel.id='dateRangeLabel'; rangeLabel.className='date-range-label';
+    const updateLabel = ()=>{ const s=startEl.value||''; const e=endEl.value||''; rangeLabel.textContent = s && e ? `${s} 〜 ${e}` : (s||e||'範囲を選択'); };
+    // update when inputs change
+    startEl.addEventListener('change', updateLabel);
+    endEl.addEventListener('change', updateLabel);
+    updateLabel();
+
+    container.appendChild(btnWrap);
+    container.appendChild(rangeLabel);
+
+    // insert container before the draw button if present, otherwise before export
+    const drawBtn = document.getElementById('drawBtn');
+    const exportBtn = document.getElementById('exportCsv');
+    const insertBefore = drawBtn || exportBtn || startEl.nextSibling;
+    insertBefore.parentNode.insertBefore(container, insertBefore);
+  })();
+
   // Render function - reusable for both manual draw and auto-update
   function renderAll(){
     const s = parseDateInput('startDate'); 
@@ -442,7 +487,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
         const sel = document.createElement('select');
         sel.id = 'exportFormat';
         const optCsv = document.createElement('option'); optCsv.value = 'csv'; optCsv.text = 'CSV';
-        const optMd = document.createElement('option'); optMd.value = 'md'; optMd.text = 'Obsidian (MD)';
+        const optMd = document.createElement('option'); optMd.value = 'md'; optMd.text = 'MD';
         sel.appendChild(optCsv); sel.appendChild(optMd);
         sel.style.padding = '4px 6px';
         sel.style.borderRadius = '4px';
@@ -466,7 +511,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
     
   if(!dateStr){ alert('日付を入力してください'); return; }
   // Valid ranges: M = -2..2, E = 1..5
-  if(m < -2 || m > 2 || e < 1 || e > 5){ alert('M値は-2〜2、E値は1〜5の範囲で入力してください'); return; }
+  if(m < -2 || m > 2 || e < 1 || e > 5){ alert('Moodは-2〜2、Effortは1〜5の範囲で入力してください'); return; }
     
     // Create timestamp from date + time
     const [year, month, day] = dateStr.split('-').map(Number);
