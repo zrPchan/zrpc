@@ -100,11 +100,14 @@ function renderChart(canvasId, label, freqData, startDate, endDate){
   const paddingTop = Math.floor(100 * scale);
   const paddingBottom = Math.floor(100 * scale);
 
-  // Grid width determines grid height so cells are square (24 x 5)
+  // Determine score values: Mood uses -2..2, Effort uses 1..5
+  const scoreValues = (canvasId === 'moodChart') ? [-2, -1, 0, 1, 2] : [1,2,3,4,5];
+  const numScores = scoreValues.length;
+  // Grid width determines grid height so cells are square (24 x numScores)
   const gridWidth = canvas.width - paddingLeft - paddingRight;
-  const gridHeight = Math.floor(gridWidth * 5 / 24);
+  const gridHeight = Math.floor(gridWidth * numScores / 24);
   const cellWidth = gridWidth / 24;
-  const cellHeight = gridHeight / 5;
+  const cellHeight = gridHeight / numScores;
   const totalHeight = Math.max(120, gridHeight + paddingTop + paddingBottom);
   canvas.height = totalHeight;
   
@@ -202,13 +205,15 @@ function renderChart(canvasId, label, freqData, startDate, endDate){
   for(let hour = 0; hour < 24; hour++){
     const scores = hourlyFreq[hour];
     
-    for(let scoreVal = 1; scoreVal <= 5; scoreVal++){
+    for(let si = 0; si < numScores; si++){
+      const scoreVal = scoreValues[si];
       const count = scores[scoreVal] || 0;
       const deviation = count > 0 && stdDev > 0 ? 50 + 10 * (count - mean) / stdDev : (count > 0 ? 50 : 0);
       const clampedDev = Math.max(0, Math.min(100, deviation));
       
       const x = gridStartX + hour * cellWidth;
-      const y = paddingTop + (5 - scoreVal) * cellHeight; // invert Y axis (5 at top, 1 at bottom)
+      // invert Y axis: highest score at top
+      const y = paddingTop + (numScores - 1 - si) * cellHeight;
       
       ctx.fillStyle = getColor(clampedDev);
       ctx.fillRect(x, y, cellWidth - 1, cellHeight - 1);
@@ -244,9 +249,11 @@ function renderChart(canvasId, label, freqData, startDate, endDate){
   ctx.font = `${fontSize.yAxisLabel}px sans-serif`;
   ctx.textAlign = 'right';
   ctx.textBaseline = 'middle';
-  for(let s = 1; s <= 5; s++){
-    const y = paddingTop + (5 - s) * cellHeight + cellHeight / 2;
-    ctx.fillText(`${s}点`, Math.max(0, paddingLeft - visualPadding * 0.4), y);
+  // Y-axis labels: use scoreValues (top to bottom)
+  for(let si = 0; si < numScores; si++){
+    const labelVal = scoreValues[numScores - 1 - si]; // top label is highest score
+    const y = paddingTop + si * cellHeight + cellHeight / 2;
+    ctx.fillText(`${labelVal}点`, Math.max(0, paddingLeft - visualPadding * 0.4), y);
   }
   
   // Draw axis titles
