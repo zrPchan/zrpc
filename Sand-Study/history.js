@@ -285,6 +285,110 @@ function renderChart(canvasId, label, freqData, startDate, endDate){
   ctx.restore();
 }
 
+// Compute per-day layer increases between consecutive days in range
+function computeDailyLayerDeltas(startDate, endDate){
+  const days = dateRange(startDate, endDate);
+  const deltas = {}; // { '2025-11-09': 3, ... }
+  let prevLayer = 0;
+  for(const day of days){
+    const raw = localStorage.getItem(keyDailyForDay(day));
+    let obj = null;
+    try{ obj = JSON.parse(raw || '{}') || {}; }catch(e){ obj = {}; }
+    const layer = Number(obj.layerTotal || 0);
+    const delta = Math.max(0, layer - prevLayer);
+    deltas[day] = delta;
+    prevLayer = layer;
+  }
+  return deltas;
+}
+
+// Render calendar heatmap: rows = weekdays (Mon..Sun), cols = weeks from start to end
+function renderCalendarHeatmap(canvasId, startDate, endDate, deltas){
+  const canvas = document.getElementById(canvasId);
+  if(!canvas) return;
+
+  // Build a start-of-week (Monday) for leftmost column
+  const start = new Date(startDate);
+  const startDow = start.getDay(); // 0=Sun..6=Sat
+  // compute monday of that week
+  const monday = new Date(start);
+  const offsetToMonday = (startDow === 0) ? -6 : (1 - startDow);
+  monday.setDate(start.getDate() + offsetToMonday);
+
+  // number of days in range
+  const days = dateRange(startDate, endDate);
+  const last = new Date(endDate);
+  // compute number of weeks columns
+  const diffDays = Math.ceil(( (new Date(endDate)).getTime() - monday.getTime()) / (24*3600*1000)) + 1;
+  const weeks = Math.ceil(diffDays / 7);
+
+  // layout
+  const cellSize = Math.max(12, Math.min(28, Math.floor((window.innerWidth - 320) / Math.max(8, weeks))));
+  const gutter = 4;
+  const yLabelsWidth = 48;
+  const width = yLabelsWidth + weeks * (cellSize + gutter) + 24;
+  const height = (7 * (cellSize + gutter)) + 40;
+  canvas.width = Math.min(width, 1800);
+  canvas.height = height;
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0,0,canvas.width, canvas.height);
+
+  // weekday labels (Monday..Sunday in Japanese)
+  const weekdays = ['月','火','水','木','金','土','日'];
+  ctx.font = '12px sans-serif';
+  ctx.fillStyle = '#374151';
+  for(let i=0;i<7;i++){
+    const y = 20 + i * (cellSize + gutter) + cellSize/2;
+    ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
+    ctx.fillText(weekdays[i], yLabelsWidth - 8, y);
+  }
+
+  // prepare color scale: map delta (0..maxDelta) to color
+  const values = Object.values(deltas || {});
+  const max = Math.max(1, ...values);
+  const getColor = (v)=>{
+    if(!v || v <= 0) return '#f3f4f6';
+    // interpolate green->orange->red
+    const t = Math.min(1, v / max);
+    const r = Math.round(59 + t*(239-59));
+    const g = Math.round(130 - t*(130-88));
+    const b = Math.round(246 - t*(246-60));
+    return `rgb(${r},${g},${b})`;
+  };
+
+  // draw cells week by week
+  for(let w=0; w<weeks; w++){
+    for(let d=0; d<7; d++){
+      const colX = yLabelsWidth + w * (cellSize + gutter) + 8;
+      const colY = 12 + d * (cellSize + gutter);
+      // compute date for this cell
+      const cellDate = new Date(monday);
+      cellDate.setDate(monday.getDate() + w*7 + d);
+      const dayKey = localDateString(cellDate);
+      // only draw if within requested range
+      if(new Date(dayKey) < new Date(startDate) || new Date(dayKey) > new Date(endDate)){
+        // draw inactive cell
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(colX, colY, cellSize, cellSize);
+        ctx.strokeStyle = 'rgba(0,0,0,0.04)'; ctx.strokeRect(colX, colY, cellSize, cellSize);
+        continue;
+      }
+      const v = deltas[dayKey] || 0;
+      ctx.fillStyle = getColor(v);
+      ctx.fillRect(colX, colY, cellSize, cellSize);
+      ctx.strokeStyle = 'rgba(0,0,0,0.06)'; ctx.strokeRect(colX, colY, cellSize, cellSize);
+      // small number label if value > 0 and enough space
+      if(v > 0 && cellSize > 18){
+        ctx.fillStyle = v > max*0.6 ? '#fff' : '#111827';
+        ctx.font = 'bold 12px sans-serif';
+        ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        ctx.fillText(String(v), colX + cellSize/2, colY + cellSize/2);
+      }
+    }
+  }
+  // footer: week labels for first day of each week (YYYY-MM-DD) optional
+}
+
 function renderBottleList(start,end){
   const days = dateRange(start,end);
   const out = [];
@@ -475,6 +579,9 @@ document.addEventListener('DOMContentLoaded', ()=>{
     const agg = aggregateHourly(entries);
     renderChart('moodChart','Mood 頻度', agg.dailyHourlyMoodFreq, s, e);
     renderChart('effortChart','Effort 頻度', agg.dailyHourlyEffFreq, s, e);
+  // calendar heatmap for layer increases
+  const deltas = computeDailyLayerDeltas(s,e);
+  renderCalendarHeatmap('calendarHeatmap', s, e, deltas);
     renderBottleList(s,e);
     // attach csv/export controls: ensure a select dropdown exists so users can pick format
     const exportBtn = document.getElementById('exportCsv');
