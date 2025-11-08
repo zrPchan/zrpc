@@ -374,8 +374,22 @@ document.addEventListener('DOMContentLoaded', ()=>{
   const today = new Date().toISOString().slice(0,10);
   const startEl = document.getElementById('startDate');
   const endEl = document.getElementById('endDate');
-  if(startEl) startEl.value = today;
-  if(endEl) endEl.value = today;
+  // デフォルト: 空の場合は今日を設定する（既に値がある場合は上書きしない）
+  if(startEl && !startEl.value) startEl.value = today;
+  if(endEl && !endEl.value) endEl.value = today;
+
+  // 開始日を変更したとき、終了日が未設定または開始日より前なら終了日を同期する
+  if(startEl){
+    startEl.addEventListener('change', () => {
+      try{
+        const s = startEl.value;
+        if(!s) return;
+        if(endEl && (!endEl.value || new Date(endEl.value) < new Date(s))){
+          endEl.value = s;
+        }
+      }catch(e){ /* ignore */ }
+    });
+  }
   
   // デバッグ用ログ追加機能
   const debugDateEl = document.getElementById('debugDate');
