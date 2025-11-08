@@ -345,19 +345,22 @@ function exportMarkdown(entries){
   for(const day of days){
     lines.push(`# ${day}`);
     lines.push('');
-    lines.push('| Time | Mood | Effort | Task | Insight | Next |');
-    lines.push('|---:|:---:|:---:|:---|:---|:---|');
+  // Obsidian 用テンプレート（日本語ヘッダ）
+  lines.push('| 開始 | 終了 | 気分 | 努力感 | タスク名 | 気づき | 次のタスク |');
+  // 開始/終了は右寄せ、気分/努力感は中央、残りは左寄せ
+  lines.push('|---:|---:|:---:|:---:|:---|:---|:---|');
     const list = (byDay[day] || []).slice().sort((a,b)=> ((a.start||a.createdAt)||0) - ((b.start||b.createdAt)||0));
     for(const t of list){
       const start = new Date((t.start||t.createdAt)*1000);
       const end = new Date((t.end||t.createdAt||t.start)*1000);
-      const startTime = start.toISOString().slice(11,16);
-      const mood = (typeof t.mood !== 'undefined') ? String(t.mood) : '';
-      const effort = (typeof t.effort !== 'undefined') ? String(t.effort) : '';
-      const task = (t.taskname||'').replace(/\|/g,'\|');
-      const insight = (t.insight||'').replace(/\|/g,'\|');
-      const next = (t.nexttask||'').replace(/\|/g,'\|');
-      lines.push(`| ${startTime} | ${mood} | ${effort} | ${task} | ${insight} | ${next} |`);
+  const startTime = start.toISOString().slice(11,16);
+  const endTime = end.toISOString().slice(11,16);
+  const mood = (typeof t.mood !== 'undefined') ? String(t.mood) : '';
+  const effort = (typeof t.effort !== 'undefined') ? String(t.effort) : '';
+  const task = (t.taskname||'').replace(/\|/g,'\|');
+  const insight = (t.insight||'').replace(/\|/g,'\|');
+  const next = (t.nexttask||'').replace(/\|/g,'\|');
+  lines.push(`| ${startTime} | ${endTime} | ${mood} | ${effort} | ${task} | ${insight} | ${next} |`);
     }
     lines.push('');
   }
