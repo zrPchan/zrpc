@@ -286,12 +286,35 @@ function renderBottleList(start,end){
 }
 
 function exportCsv(entries){
-  const rows = [['start','end','mood','effort','taskname','insight','nexttask']];
+  // Group entries by day (YYYY-MM-DD) and produce a CSV with a date header for each day.
+  // Individual rows will only include times (HH:MM) so the per-row date is hidden.
+  const byDay = {};
   for(const t of entries){
-    const start = new Date((t.start||t.createdAt)*1000).toISOString();
-    const end = new Date((t.end||t.createdAt||t.start)*1000).toISOString();
-    rows.push([start,end,(''+t.mood),(''+t.effort), (t.taskname||''), (t.insight||''),(t.nexttask||'')]);
+    const ts = (t.start || t.createdAt || Date.now()/1000) * 1000;
+    const day = new Date(ts).toISOString().slice(0,10);
+    if(!byDay[day]) byDay[day] = [];
+    byDay[day].push(t);
   }
+
+  const days = Object.keys(byDay).sort();
+  const rows = [];
+  for(const day of days){
+    rows.push([`Date: ${day}`]);
+    // header for this day's logs (time only for start/end)
+    rows.push(['start_time','end_time','mood','effort','taskname','insight','nexttask']);
+    // sort entries by start time within the day
+    const list = (byDay[day] || []).slice().sort((a,b)=> ((a.start||a.createdAt)||0) - ((b.start||b.createdAt)||0));
+    for(const t of list){
+      const start = new Date((t.start||t.createdAt)*1000);
+      const end = new Date((t.end||t.createdAt||t.start)*1000);
+      const startTime = start.toISOString().slice(11,16);
+      const endTime = end.toISOString().slice(11,16);
+      rows.push([startTime, endTime, (''+ (typeof t.mood !== 'undefined' ? t.mood : '')), (''+ (typeof t.effort !== 'undefined' ? t.effort : '')), (t.taskname||''), (t.insight||''), (t.nexttask||'')]);
+    }
+    // blank separator row
+    rows.push([]);
+  }
+
   const csv = rows.map(r=> r.map(c=> '"'+(''+c).replace(/"/g,'""')+'"').join(',')).join('\n');
   const blob = new Blob([csv],{type:'text/csv;charset=utf-8;'});
   const url = URL.createObjectURL(blob);
