@@ -1,8 +1,11 @@
 /* ヒートマップ大見出し・各グラフ見出しの中央配置 */
 .heatmap-main-title {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  margin: 18px auto 12px auto;
   text-align: center;
-  margin: 32px auto 24px auto;
-  font-size: 2rem;
+  font-size: 22px; /* match app header h1 for consistent scale */
   font-weight: 700;
 }
 .heatmap-title {
@@ -12,6 +15,7 @@
   margin-bottom: 8px;
 }
 :root{
+  --content-max-width: 1200px;
   --bg-1: #fff7fb; /* page gradient start */
   --bg-2: #fffcf5; /* page gradient end */
   --card: #fffefc; /* card / panel */
@@ -37,6 +41,21 @@
   --overtime-text: #7a4b11;
   --chip-bg: #fff2f7;
   --update-bg: #0b63ff;
+}
+
+/* centralize main content columns (bottle list, heatmaps, headings) */
+.bottle-list,
+.container-heatmap,
+.heatmaps,
+.heatmap-main-title,
+.container-720{
+  max-width: var(--content-max-width);
+  margin-left: auto;
+  margin-right: auto;
+}
+
+@media (max-width: 900px){
+  :root{ --content-max-width: 100%; }
 }
 
 body{font-family:'Baloo 2','Inter',system-ui,-apple-system,'Segoe UI',Roboto,Helvetica,Arial; margin:18px; color:var(--text); background: linear-gradient(180deg, var(--bg-1), var(--bg-2));}
@@ -370,7 +389,7 @@ button:disabled{opacity:0.5;cursor:not-allowed}
 .mt-12{ margin-top:12px }
 .mt-16{ margin-top:16px }
 .mt-18{ margin-top:18px }
-.container-720{ max-width:720px; margin:18px auto }
+  .container-720{ max-width:var(--content-max-width); margin:18px auto }
 .container-heatmap{
   max-width: 3000px;
   margin: 18px auto;
@@ -396,7 +415,7 @@ button:disabled{opacity:0.5;cursor:not-allowed}
   display: grid;
   grid-template-columns: 1fr;
   gap: 12px;
-  max-width: 900px;
+  max-width: var(--content-max-width);
   margin: 8px auto 18px auto;
 }
 .bottle-list .log-item{
@@ -415,8 +434,13 @@ button:disabled{opacity:0.5;cursor:not-allowed}
 .heatmap-card canvas{display:block;max-width:100%;border-radius:8px}
 
 @media (min-width: 900px){
+  /* Desktop layout: two columns for heatmaps, wider bottle list and heatmap columns aligned */
   .heatmaps{grid-template-columns:1fr 1fr}
-  .bottle-list{grid-template-columns:repeat(2,1fr);max-width:1200px}
+  .bottle-list{grid-template-columns:repeat(2,1fr);}
+  /* Ensure heatmap containers match the bottle-list column width on desktop via --content-max-width */
+  .container-heatmap{max-width:var(--content-max-width)}
+  .heatmaps{max-width:var(--content-max-width)}
+  .heatmap-main-title{max-width:var(--content-max-width)}
 }
 
 .muted{ color:var(--muted) }
