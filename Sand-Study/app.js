@@ -760,21 +760,13 @@ function handleThemeUnlocks(prevLevel, newLevel){
           sel.classList.remove('locked');
           sel.removeAttribute('data-unlock');
           sel.removeAttribute('aria-disabled');
-          // animate: add unlock class then remove after animation
-          sel.classList.add('theme-unlocked');
           // ensure focusable/interactable
           sel.disabled = false;
-          setTimeout(()=>{ try{ sel.classList.remove('theme-unlocked'); }catch(e){} }, 1500);
         }
       }catch(e){}
       // global notification for user
       try{ showToast(`${name} テーマを解放しました！` , 2500); }catch(e){}
-      // small celebratory effect on body (glow) for a short moment
-      try{
-        const body = document.documentElement || document.body;
-        body.classList.add('theme-unlock-glow');
-        setTimeout(()=>{ try{ body.classList.remove('theme-unlock-glow'); }catch(e){} }, 1000);
-      }catch(e){}
+      // (no animation per user request)
     });
   }catch(e){ console.warn('handleThemeUnlocks error', e); }
 }
