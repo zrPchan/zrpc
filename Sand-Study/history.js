@@ -286,16 +286,16 @@ function renderBottleList(start,end){
 }
 
 function exportCsv(entries){
-  // Ask user which format they want: CSV or Obsidian Markdown
+  // Read selection from a page-level select (#exportFormat). Default to csv.
   try{
-    const choice = window.prompt('Export format: type "md" for Obsidian Markdown or "csv" for CSV (default csv):', 'md');
-    if(choice && String(choice).toLowerCase().trim() === 'md'){
+    const sel = document.getElementById('exportFormat');
+    const choice = sel ? (sel.value || 'csv') : 'csv';
+    if(String(choice).toLowerCase() === 'md'){
       exportMarkdown(entries);
     } else {
       exportCsvRaw(entries);
     }
   }catch(e){
-    // fallback to CSV
     exportCsvRaw(entries);
   }
 }
@@ -424,8 +424,36 @@ document.addEventListener('DOMContentLoaded', ()=>{
     renderChart('moodChart','Mood 頻度', agg.dailyHourlyMoodFreq, s, e);
     renderChart('effortChart','Effort 頻度', agg.dailyHourlyEffFreq, s, e);
     renderBottleList(s,e);
-    // attach csv export
-    document.getElementById('exportCsv').onclick = ()=> exportCsv(entries);
+    // attach csv/export controls: ensure a select dropdown exists so users can pick format
+    const exportBtn = document.getElementById('exportCsv');
+    if(exportBtn){
+      if(!document.getElementById('exportFormat')){
+        const wrapper = document.createElement('span');
+        wrapper.style.display = 'inline-flex';
+        wrapper.style.alignItems = 'center';
+        wrapper.style.gap = '8px';
+
+        const label = document.createElement('label');
+        label.htmlFor = 'exportFormat';
+        label.textContent = '形式:';
+        label.style.fontSize = '0.9em';
+        label.style.color = '#374151';
+
+        const sel = document.createElement('select');
+        sel.id = 'exportFormat';
+        const optCsv = document.createElement('option'); optCsv.value = 'csv'; optCsv.text = 'CSV';
+        const optMd = document.createElement('option'); optMd.value = 'md'; optMd.text = 'Obsidian (MD)';
+        sel.appendChild(optCsv); sel.appendChild(optMd);
+        sel.style.padding = '4px 6px';
+        sel.style.borderRadius = '4px';
+        sel.style.border = '1px solid #d1d5db';
+
+        wrapper.appendChild(label);
+        wrapper.appendChild(sel);
+        exportBtn.parentNode.insertBefore(wrapper, exportBtn);
+      }
+      exportBtn.onclick = ()=> exportCsv(entries);
+    }
   }
   
   // デバッグ用ログ追加機能
