@@ -376,8 +376,18 @@ document.addEventListener('DOMContentLoaded', ()=>{
       const rawDaily = localStorage.getItem(dailyKey) || '{}';
       let dailyObj = {};
       try{ dailyObj = JSON.parse(rawDaily) || {}; }catch(e){ dailyObj = {}; }
-      dailyObj.bottlesToday = (dailyObj.bottlesToday || 0) + 1;
-      dailyObj.layerTotal = (dailyObj.layerTotal || 0) + (layer || 0);
+      // Add layer amount, then recompute bottlesToday from layerTotal to avoid double-counting
+      const prevLayer = Number(dailyObj.layerTotal || 0);
+      const addLayer = Number(layer || 0);
+      const newLayerTotal = prevLayer + addLayer;
+      dailyObj.layerTotal = newLayerTotal;
+      // BOTTLE_CAP is defined in app.js (shared); compute today's bottles as floor(layerTotal / BOTTLE_CAP)
+      try{
+        dailyObj.bottlesToday = Math.floor(newLayerTotal / BOTTLE_CAP);
+      }catch(e){
+        // fallback if BOTTLE_CAP not in scope
+        dailyObj.bottlesToday = Math.floor(newLayerTotal / 100);
+      }
       dailyObj.lastUpdated = new Date().toISOString();
       localStorage.setItem(dailyKey, JSON.stringify(dailyObj));
     }catch(err){ console.warn('Failed to update daily summary', err); }
