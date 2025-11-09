@@ -727,9 +727,9 @@ button:disabled{opacity:0.5;cursor:not-allowed}
 /* Make the auto-save label darker on the timer screen */
 #autoSaveControls label{color:var(--text-strong)}
 .theme-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;padding:6px}
-.theme-swatch{border-radius:8px;padding:8px;border:1px solid var(--border);background:linear-gradient(180deg,var(--card),var(--card));display:flex;flex-direction:column;align-items:center;gap:8px;cursor:pointer}
-.theme-swatch:hover{transform:translateY(-4px);box-shadow:0 10px 30px rgba(34,20,35,0.08)}
-.theme-swatch.locked{opacity:0.5;cursor:not-allowed;transform:none}
+.theme-swatch{border-radius:8px;padding:8px;border:1px solid rgba(0,0,0,0.06);background:#ffffff;display:flex;flex-direction:column;align-items:center;gap:8px;cursor:pointer}
+.theme-swatch:hover{transform:translateY(-4px);box-shadow:0 10px 30px rgba(34,20,35,0.06)}
+.theme-swatch.locked{opacity:0.6;cursor:not-allowed;transform:none}
 .theme-swatch .swatch-lock{font-size:12px;margin-top:6px;color:var(--muted)}
 
 /* Unlock animation: small bounce + glow to celebrate unlocking a theme */
