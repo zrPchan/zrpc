@@ -36,6 +36,35 @@ function localTimeString(d = new Date()){
   return `${hh}:${mm}`;
 }
 
+// Shared color gradient: t in [0,1] -> color between dark purple -> purple -> cyan -> green -> yellow -> orange -> red -> dark red
+function colorFromPercent(t){
+  if(typeof t !== 'number' || !isFinite(t)) t = 0;
+  t = Math.max(0, Math.min(1, t));
+  if(t === 0) return null; // caller can decide pale background for zero/no-data
+  const stops = [
+    [76,29,149],   // #4c1d95 (dark purple)
+    [109,40,217],  // #6d28d9 (purple)
+    [6,182,212],   // #06b6d4 (cyan)
+    [16,185,129],  // #10b981 (green)
+    [250,204,21],  // #facc15 (yellow)
+    [251,146,60],  // #fb923c (orange)
+    [239,68,68],   // #ef4444 (red)
+    [153,27,27]    // #991b1b (dark red)
+  ];
+  const n = stops.length;
+  const scaled = t * (n - 1);
+  const i = Math.floor(scaled);
+  const frac = scaled - i;
+  if(i >= n-1) {
+    const c = stops[n-1]; return `rgb(${c[0]},${c[1]},${c[2]})`;
+  }
+  const a = stops[i], b = stops[i+1];
+  const r = Math.round(a[0] + frac * (b[0]-a[0]));
+  const g = Math.round(a[1] + frac * (b[1]-a[1]));
+  const bl = Math.round(a[2] + frac * (b[2]-a[2]));
+  return `rgb(${r},${g},${bl})`;
+}
+
 function parseDateInput(id){ const el=document.getElementById(id); if(!el || !el.value) return null; return el.value; }
 
 function dateRange(start, end){
@@ -179,25 +208,10 @@ function renderChart(canvasId, label, freqData, startDate, endDate){
   // Color scale based on deviation score
   const getColor = (deviation) => {
     if(deviation === 0) return 'rgba(240, 240, 240, 0.3)'; // no data
-    // Gradient: blue (low) -> green -> yellow -> orange -> red (high)
-    const colors = [
-      { dev: 0, rgb: [59, 130, 246] },    // blue
-      { dev: 30, rgb: [34, 197, 94] },    // green
-      { dev: 50, rgb: [250, 204, 21] },   // yellow
-      { dev: 70, rgb: [251, 146, 60] },   // orange
-      { dev: 100, rgb: [239, 68, 68] }    // red
-    ];
-    
-    for(let i = 0; i < colors.length - 1; i++){
-      if(deviation >= colors[i].dev && deviation <= colors[i+1].dev){
-        const t = (deviation - colors[i].dev) / (colors[i+1].dev - colors[i].dev);
-        const r = Math.round(colors[i].rgb[0] + t * (colors[i+1].rgb[0] - colors[i].rgb[0]));
-        const g = Math.round(colors[i].rgb[1] + t * (colors[i+1].rgb[1] - colors[i].rgb[1]));
-        const b = Math.round(colors[i].rgb[2] + t * (colors[i+1].rgb[2] - colors[i].rgb[2]));
-        return `rgba(${r}, ${g}, ${b}, 0.85)`;
-      }
-    }
-    return 'rgba(239, 68, 68, 0.85)';
+    // Map deviation (0..100) to 0..1 and use unified gradient
+    const t = Math.max(0, Math.min(1, deviation / 100));
+    const col = colorFromPercent(t);
+    return col ? col.replace('rgb', 'rgba').replace(')', ', 0.85)') : 'rgba(240,240,240,0.3)';
   };
   
   // Responsive font sizes - より大きく見やすく
@@ -358,12 +372,10 @@ function renderCalendarHeatmap(canvasId, startDate, endDate, deltas, weeksArg){
   const max = Math.max(1, ...values);
   const getColor = (v)=>{
     if(!v || v <= 0) return '#f3f4f6';
-    // interpolate green->orange->red
-    const t = Math.min(1, v / max);
-    const r = Math.round(59 + t*(239-59));
-    const g = Math.round(130 - t*(130-88));
-    const b = Math.round(246 - t*(246-60));
-    return `rgb(${r},${g},${b})`;
+    // use unified gradient; map v/max -> 0..1
+    const t = Math.min(1, (v || 0) / Math.max(1, max));
+    const col = colorFromPercent(t);
+    return col || '#f3f4f6';
   };
 
   // draw cells week by week
@@ -396,6 +408,24 @@ function renderCalendarHeatmap(canvasId, startDate, endDate, deltas, weeksArg){
       }
     }
   }
+  // draw month labels under the weeks (show when month changes)
+  try{
+    let prevMonth = null;
+    ctx.font = '12px sans-serif';
+    ctx.fillStyle = '#374151';
+    for(let w=0; w<weeks; w++){
+      const weekStart = new Date(monday);
+      weekStart.setDate(monday.getDate() + w*7);
+      const month = weekStart.getMonth() + 1;
+      if(w === 0 || month !== prevMonth){
+        const x = yLabelsWidth + w * (cellSize + gutter) + 8 + cellSize/2;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'top';
+        ctx.fillText(`${month}月`, x, canvas.height - 18);
+        prevMonth = month;
+      }
+    }
+  }catch(err){ /* ignore label errors */ }
   // footer: week labels for first day of each week (YYYY-MM-DD) optional
 }
 
