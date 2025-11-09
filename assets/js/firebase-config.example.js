@@ -14,13 +14,13 @@
 
 // Minimal template (replace the placeholders below):
 window.FIREBASE_CONFIG = {
-  apiKey: "<YOUR_API_KEY>",
-  authDomain: "<YOUR_PROJECT>.firebaseapp.com",
-  projectId: "<YOUR_PROJECT_ID>",
-  storageBucket: "<YOUR_PROJECT>.appspot.com",
-  messagingSenderId: "<YOUR_SENDER_ID>",
-  appId: "<YOUR_APP_ID>",
-  measurementId: "<YOUR_MEASUREMENT_ID>"
+  apiKey: "AIzaSyCfqhKmMGWLhbG5yXfMuLJRyoXG_weHihU",
+  authDomain: "sand-study-5c84b.firebaseapp.com",
+  projectId: "sand-study-5c84b",
+  storageBucket: "sand-study-5c84b.firebasestorage.app",
+  messagingSenderId: "142543528127",
+  appId: "1:142543528127:web:fab3f88e791feb010fe60a",
+  measurementId: "G-VFDML50CWV"
 };
 
 // After creating the file, reload the page. The site will automatically call firebase.initializeApp(window.FIREBASE_CONFIG)

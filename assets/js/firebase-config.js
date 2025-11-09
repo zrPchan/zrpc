@@ -8,7 +8,7 @@
 */
 
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
-const firebaseConfig = {
+window.FIREBASE_CONFIG = {
   apiKey: "AIzaSyCfqhKmMGWLhbG5yXfMuLJRyoXG_weHihU",
   authDomain: "sand-study-5c84b.firebaseapp.com",
   projectId: "sand-study-5c84b",

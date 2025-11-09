@@ -75,7 +75,7 @@ body{font-family:'Baloo 2','Inter',system-ui,-apple-system,'Segoe UI',Roboto,Hel
 
 /* Ensure stat labels and numbers use stronger (darker) text for readability */
 .stat{color:var(--text-strong)}
-.bottle{position:relative;width:160px;height:260px;margin:18px auto;border-radius:28px;overflow:hidden;background:linear-gradient(180deg,var(--card),var(--bg-2));box-shadow:var(--shadow);border:1px solid var(--border)}
+.bottle{position:relative;width:160px;height:260px;margin:18px auto;border-radius:28px;overflow:hidden;background:transparent;box-shadow:var(--shadow);border:1px solid var(--border)}
 .rim{position:absolute;inset:0;border-radius:28px;pointer-events:none}
 .sand{position:absolute;left:8px;right:8px;bottom:8px;height:calc(100% - 16px);overflow:hidden;border-radius:18px}
 .sand-layer{position:absolute;left:0;width:100%;box-sizing:border-box;border-top:1px solid rgba(0,0,0,0.03);border-radius:8px;background:linear-gradient(180deg,var(--sand-1),var(--sand-2))}
