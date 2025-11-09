@@ -951,10 +951,34 @@ try{
   const favListEl = document.getElementById('favList'); if(favListEl){ favListEl.addEventListener('dblclick', (ev)=>{ const item = ev.target.closest && ev.target.closest('.fav-item'); if(!item) return; const m = Number(item.getAttribute('data-min')); if(m){ setTargetMinutes(m); closeFavs(); } }); }
 }catch(e){/* ignore binding errors */}
 
+// Bind ring color picker controls (in theme popup)
+try{
+  const ringInput = document.getElementById('ringColorInput');
+  const ringReset = document.getElementById('ringColorReset');
+  if(ringInput){
+    // initialize input to current computed ring color (either saved custom or theme default)
+    try{
+      const cs = getComputedStyle(document.documentElement);
+      let cur = cs.getPropertyValue('--ring-color') || cs.getPropertyValue('--accent');
+      cur = (cur||'').trim();
+      // if value is a rgb() form, try to convert? we just set the input to hex fallback if empty
+      if(cur && cur.indexOf('rgb') === -1) ringInput.value = cur;
+    }catch(e){}
+    ringInput.addEventListener('input', (ev)=>{ try{ const v = ev.target.value; if(v) applyRingColor(v); }catch(e){} });
+  }
+  if(ringReset){ ringReset.addEventListener('click', ()=>{ try{ applyRingColor(null); // remove custom
+      // update input to reflect theme-default value
+      try{ const cs = getComputedStyle(document.documentElement); let def = cs.getPropertyValue('--ring-color') || cs.getPropertyValue('--accent'); def = (def||'').trim(); if(ringInput && def) ringInput.value = def; }catch(e){}
+    }catch(e){} }); }
+}catch(e){/* ignore */}
+
 
 // --- Theme picker: palettes (basic / solid × sand, red, blue, green, pink, silver)
 const THEME_KEY = 'uiTheme:v1';
 const BG_THEME_KEY = 'uiBgTheme:v1';
+const RING_COLOR_KEY = 'uiRingColor:v1';
+// Preset colors for ring picker (mapped to theme ids)
+const RING_PRESETS = { sand:'#d6b77a', red:'#e05a6a', blue:'#4a8fe0', green:'#34a853', pink:'#f47aa6', silver:'#9aa6b3' };
 const THEMES = [
   // Basic themes with unlock levels (0 = unlocked by default)
   {id:'sand', name:'Sand', c1:'#fffaf5', c2:'#fff6ec', unlock:0},
@@ -999,6 +1023,22 @@ function applyBgThemeId(id){
   }catch(e){ console.warn('applyBgThemeId failed', e); }
 }
 
+// Allow user to set a custom ring color which overrides theme defaults.
+function applyRingColor(color){
+  try{
+    const root = document.documentElement || document.body;
+    if(!color){
+      // remove custom and let CSS theme vars take effect
+      try{ root.style.removeProperty('--ring-color'); }catch(e){}
+      try{ localStorage.removeItem(RING_COLOR_KEY); }catch(e){}
+      return;
+    }
+    // ensure the color is a string like '#rrggbb' or valid CSS color
+    try{ root.style.setProperty('--ring-color', String(color)); }catch(e){}
+    try{ localStorage.setItem(RING_COLOR_KEY, String(color)); }catch(e){}
+  }catch(e){ console.warn('applyRingColor failed', e); }
+}
+
 function renderThemeGrid(){
   const grid = document.getElementById('themeGrid'); if(!grid) return;
   // determine current user level from internal data (today.bottlesCum) so picker reflects unlocks even when overlay opened before UI render
@@ -1036,11 +1076,48 @@ function openThemes(){
   if(!overlay || !popup) return;
   overlay.setAttribute('aria-hidden','false'); overlay.style.display = 'flex'; popup.setAttribute('aria-hidden','false');
   renderThemeGrid();
+  try{ renderRingPresets(); }catch(e){}
   if(!window._themeOverlayBound){
     window._themeOverlayBound = true;
     try{ overlay.addEventListener('click', (ev)=>{ if(ev.target === overlay) closeThemes(); }); }catch(e){}
     try{ document.addEventListener('keydown', (ev)=>{ if(ev.key === 'Escape'){ const ov = document.getElementById('themeOverlay'); if(ov && ov.style.display !== 'none'){ closeThemes(); } } }); }catch(e){}
   }
+}
+
+// Render ring color preset swatches into the theme popup
+function renderRingPresets(){
+  try{
+    const container = document.getElementById('ringColorPresets');
+    if(!container) return;
+    container.innerHTML = '';
+    const saved = (function(){ try{ return localStorage.getItem(RING_COLOR_KEY); }catch(e){ return null; }})();
+    const input = document.getElementById('ringColorInput');
+    THEMES.forEach(t => {
+      const id = t.id;
+      const color = RING_PRESETS[id] || t.c2 || t.c1 || '#cccccc';
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'ring-preset';
+      btn.setAttribute('title', t.name);
+      btn.setAttribute('aria-pressed', 'false');
+      btn.dataset.color = color;
+      // style background via JS to avoid inline HTML styles in source
+      try{ btn.style.backgroundColor = color; }catch(e){}
+      btn.addEventListener('click', ()=>{
+        try{
+          // apply and update UI state
+          applyRingColor(color);
+          if(input) input.value = color;
+          // update aria-pressed on siblings
+          Array.from(container.children).forEach(c=>{ try{ c.setAttribute('aria-pressed','false'); }catch(e){} });
+          try{ btn.setAttribute('aria-pressed','true'); }catch(e){}
+        }catch(e){ console.warn('ring preset click failed', e); }
+      });
+      // if saved color matches, mark pressed
+      try{ if(saved && saved.trim().toLowerCase() === color.trim().toLowerCase()){ btn.setAttribute('aria-pressed','true'); if(input) input.value = color; } }catch(e){}
+      container.appendChild(btn);
+    });
+  }catch(e){ console.warn('renderRingPresets failed', e); }
 }
 
 function closeThemes(){
@@ -1066,6 +1143,8 @@ try{
   else applyThemeId('sand');
   // Apply saved background theme if present
   try{ const savedBg = localStorage.getItem(BG_THEME_KEY); if(savedBg) applyBgThemeId(savedBg); }catch(e){}
+  // Apply saved custom ring color if present
+  try{ const savedRing = localStorage.getItem(RING_COLOR_KEY); if(savedRing) applyRingColor(savedRing); }catch(e){}
 }catch(e){}
 
 

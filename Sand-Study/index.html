@@ -136,6 +136,15 @@
               <div>
                 <div class="fav-subheader">背景色（Background）</div>
                 <div id="bgThemeGrid" class="theme-grid" aria-live="polite"></div>
+                <div class="ring-color-row">
+                  <label for="ringColorInput">タイマーリング色（個別）</label>
+                  <div class="ring-color-controls">
+                    <input id="ringColorInput" type="color" value="#4a8fe0" title="タイマーリング色を選択" />
+                    <button id="ringColorReset" type="button" class="btn-ghost">リセット</button>
+                  </div>
+                  <div id="ringColorPresets" class="ring-presets" aria-hidden="false"></div>
+                  <div class="ring-color-note">ここで選んだ色は背景テーマに優先して保存されます。</div>
+                </div>
               </div>
             </div>
           </div>
