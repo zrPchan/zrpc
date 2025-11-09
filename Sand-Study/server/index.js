@@ -58,6 +58,39 @@ const app = express();
 app.use(bodyParser.json());
 
 // Serve shared assets from repository root so /assets/* URLs resolve correctly
+// Dynamic delivery of firebase-config.js from environment variables.
+// This lets you avoid committing firebase-config.js to the repo; instead set
+// the required FIREBASE_* environment variables on the host.
+app.get('/assets/js/firebase-config.js', (req, res) => {
+  // Required fields: apiKey, authDomain, projectId, appId
+  const apiKey = process.env.FIREBASE_API_KEY;
+  const authDomain = process.env.FIREBASE_AUTH_DOMAIN;
+  const projectId = process.env.FIREBASE_PROJECT_ID;
+  const storageBucket = process.env.FIREBASE_STORAGE_BUCKET;
+  const messagingSenderId = process.env.FIREBASE_MESSAGING_SENDER_ID;
+  const appId = process.env.FIREBASE_APP_ID;
+  const measurementId = process.env.FIREBASE_MEASUREMENT_ID;
+
+  // If no API key present, respond 404 so clients fallback (and don't leak empty configs)
+  if(!apiKey){
+    return res.status(404).send('');
+  }
+
+  const cfg = {
+    apiKey: apiKey,
+    authDomain: authDomain || '',
+    projectId: projectId || '',
+    storageBucket: storageBucket || '',
+    messagingSenderId: messagingSenderId || '',
+    appId: appId || '',
+  };
+  if(measurementId) cfg.measurementId = measurementId;
+
+  res.type('application/javascript');
+  return res.send("window.FIREBASE_CONFIG = " + JSON.stringify(cfg) + ";\n");
+});
+
+// Serve shared assets from repository root so /assets/* URLs resolve correctly
 app.use('/assets', express.static(path.join(__dirname, '..', '..', 'assets')));
 
 // Serve static files from parent directory (Sand-Study root)
