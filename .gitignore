@@ -1,3 +1,7 @@
+firebase-config.js
+
+# ignore local per-project firebase config
+assets/js/firebase-config.js
 
 .vscode/chrome/
 .vercel
