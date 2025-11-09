@@ -996,9 +996,9 @@ const UNLOCK_THRESHOLDS = [3,5,7,10,12,15,17,20,22,25];
 function loadUnlockState(){
   try{
     const raw = localStorage.getItem(UNLOCK_STATE_KEY);
-    if(!raw) return { processedUpToLevel: 0, sand: ['sand'], bg: ['sand'], ring: [] };
+    if(!raw) return { processedUpToLevel: 0, sand: ['sand'], bg: ['sand'], ring: ['sand'] };
     return JSON.parse(raw);
-  }catch(e){ return { processedUpToLevel: 0, sand: ['sand'], bg: ['sand'], ring: [] }; }
+  }catch(e){ return { processedUpToLevel: 0, sand: ['sand'], bg: ['sand'], ring: ['sand'] }; }
 }
 
 function saveUnlockState(state){
