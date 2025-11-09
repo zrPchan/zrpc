@@ -332,9 +332,10 @@ function renderCalendarHeatmap(canvasId, startDate, endDate, deltas, weeksArg){
   // layout
   // compute cell size to fit 52 weeks across typical widths; min/max bounds keep cells readable
   const targetWidth = Math.min(window.innerWidth - 160, 1800);
-  const cellSize = Math.max(8, Math.min(28, Math.floor((targetWidth - yLabelsWidth - 24 - weeks * 4) / Math.max(1, weeks))));
-  const gutter = 4;
   const yLabelsWidth = 48;
+  const gutter = 4;
+  // compute cell size after constants are defined
+  const cellSize = Math.max(8, Math.min(28, Math.floor((targetWidth - yLabelsWidth - 24 - weeks * gutter) / Math.max(1, weeks))));
   const width = yLabelsWidth + weeks * (cellSize + gutter) + 24;
   const height = (7 * (cellSize + gutter)) + 40;
   canvas.width = Math.min(width, 1800);
