@@ -314,6 +314,8 @@
         }catch(e){}
       })();
     </script>
+    <!-- Initialize firebase early (loads compat SDKs + server config and sets auth persistence) -->
+    <script src="/assets/js/firebase-init.js"></script>
     <!-- Reuse shared history rendering logic -->
     <script type="module" src="history.js?v=28"></script>
   </body>

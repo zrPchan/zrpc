@@ -357,6 +357,8 @@
   </dialog>
   </div>
 
+  <!-- Initialize firebase early (loads compat SDKs + server config and sets auth persistence) -->
+  <script src="/assets/js/firebase-init.js"></script>
   <script type="module" src="app.js"></script>
   <script>
     if ("serviceWorker" in navigator) {
