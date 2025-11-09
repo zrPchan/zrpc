@@ -563,7 +563,7 @@ button:disabled{opacity:0.5;cursor:not-allowed}
 
 /* Inline debug panel fallback styles moved here to satisfy linter */
 .debug-panel{max-width:640px;margin:20px auto;padding:12px;border-radius:8px;background:hsla(var(--theme-hue),85%,52%,0.06)}
-.debug-panel summary{cursor:pointer;font-weight:700;color:var(--accent)}
+.debug-panel summary{cursor:pointer;font-weight:700;color:var(--text-strong)}
 .debug-panel .grid-row{margin-top:12px;display:grid;gap:10px}
 .debug-panel .grid-row .row{display:grid;grid-template-columns:120px 1fr;gap:8px;align-items:center}
 .debug-panel #addDebugLog{padding:8px 14px;background:var(--accent);color:white;border:none;border-radius:6px}
