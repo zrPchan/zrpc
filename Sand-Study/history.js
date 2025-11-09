@@ -874,7 +874,10 @@ document.addEventListener('DOMContentLoaded', ()=>{
             renderAll();
             syncStatus && (syncStatus.textContent = 'リモート更新受信: ' + new Date(remoteTs).toLocaleTimeString());
           }
-        }, err => { console.warn('リモート監視エラー', err); });
+        }, err => {
+          console.warn('リモート監視エラー', err);
+          try{ showSyncError(err); }catch(e){}
+        });
       }
 
       // On sign out, cleanup
@@ -893,13 +896,36 @@ document.addEventListener('DOMContentLoaded', ()=>{
               // Push merged result back to remote to ensure both sides have same merged state
               scheduleAutoUpload();
             }
-          }catch(e){ console.warn('初期リモート取得失敗', e); }
+          }catch(e){ console.warn('初期リモート取得失敗', e); try{ showSyncError(e); }catch(_){ } }
           attachRemoteListener(user.uid);
         } else {
           setAuthUI(false);
           detachRemoteListener();
         }
       });
+
+      // Show user-friendly sync error messages in the UI
+      function showSyncError(err){
+        if(!syncStatus) return;
+        try{
+          const code = err && (err.code || err.message || '').toString();
+          // FirebaseError codes sometimes look like 'permission-denied' or include that text
+          if(code.indexOf('permission-denied') !== -1 || (err && err.message && err.message.indexOf('permission-denied') !== -1)){
+            syncStatus.textContent = '同期失敗: Firestore の権限エラーです。Firebase コンソールで Firestore のルールを確認してください。';
+            return;
+          }
+          if(err && err.message && err.message.indexOf('has not been used') !== -1 || (err && err.code && err.code.indexOf('failed-precondition')!==-1)){
+            syncStatus.textContent = '同期失敗: Cloud Firestore API が有効になっていない可能性があります。Google Cloud コンソールで Firestore API を有効にしてください。';
+            return;
+          }
+          if(err && err.message && err.message.indexOf('client is offline') !== -1){
+            syncStatus.textContent = '同期中: ネットワークに接続されていないためオフラインモードです。接続を確認してください。';
+            return;
+          }
+          // Fallback: show concise message and suggest opening console for details
+          syncStatus.textContent = '同期エラーが発生しました（詳細は Console を確認）。';
+        }catch(e){ /* noop */ }
+      }
 
       firebaseInited = true;
     }catch(err){ console.warn('Firebase init error', err); setAuthUI(false); }
