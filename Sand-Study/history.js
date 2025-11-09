@@ -789,19 +789,38 @@ document.addEventListener('DOMContentLoaded', ()=>{
 
   async function initFirebaseIfAvailable(){
     if(firebaseInited) return;
+    console.debug('history.js: initFirebaseIfAvailable called', { time: new Date().toISOString(), firebaseDefined: typeof window.firebase !== 'undefined' });
     try{
-      // If firebase not present, try to load compat SDKs and optional local config
-      if(typeof window.firebase === 'undefined'){
-        try{
-          await loadScript('https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js');
-          await loadScript('https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js');
-          await loadScript('https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js');
-          // try to load local config script which should set window.FIREBASE_CONFIG
-          try{ await loadScript('/assets/js/firebase-config.js'); }catch(_){ /* ignore */ }
-        }catch(e){
-          console.warn('Failed to load Firebase SDKs on history page', e);
-          setAuthUI(false);
-          return;
+      // If firebase-init (shared initializer) is present, wait briefly for it to initialize
+      // This avoids double-loading the compat SDKs (which causes a console warning).
+      async function waitForFirebaseInit(timeoutMs = 1500){
+        const start = Date.now();
+        while(Date.now() - start < timeoutMs){
+          if(window.__FIREBASE_INITIALIZED__ || typeof window.firebase !== 'undefined') return true;
+          await new Promise(res => setTimeout(res, 50));
+        }
+        return false;
+      }
+
+      const detected = await waitForFirebaseInit(1500);
+      if(detected){
+        console.debug('history.js: detected existing firebase or firebase-init; skipping immediate dynamic SDK load');
+        // try to ensure config is loaded too
+        try{ if(!window.FIREBASE_CONFIG && !window.__FIREBASE_CONFIG__) await loadScript('/assets/js/firebase-config.js'); }catch(_){}
+      } else {
+        // If firebase not present, try to load compat SDKs and optional local config
+        if(typeof window.firebase === 'undefined'){
+          try{
+            await loadScript('https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js');
+            await loadScript('https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js');
+            await loadScript('https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js');
+            // try to load local config script which should set window.FIREBASE_CONFIG
+            try{ await loadScript('/assets/js/firebase-config.js'); }catch(_){ /* ignore */ }
+          }catch(e){
+            console.warn('Failed to load Firebase SDKs on history page', e);
+            setAuthUI(false);
+            return;
+          }
         }
       }
 
@@ -815,13 +834,17 @@ document.addEventListener('DOMContentLoaded', ()=>{
       const auth = firebase.auth();
       const db = firebase.firestore();
 
-      auth.onAuthStateChanged(user => {
-        if(user){
-          setAuthUI(true, user.uid);
-        } else {
-          setAuthUI(false);
-        }
-      });
+          console.debug('history.js: Firebase present. apps.length=', (firebase.apps && firebase.apps.length) || 0, ' auth exists=', !!firebase.auth);
+          console.debug('history.js: auth.currentUser before attach=', (()=>{ try{ const u = firebase && firebase.auth && firebase.auth().currentUser; return u ? {uid:u.uid, email:u.email} : null;}catch(e){return 'err';}})());
+
+          auth.onAuthStateChanged(user => {
+            console.debug('history.js auth.onAuthStateChanged (early):', { time: new Date().toISOString(), user: user ? { uid: user.uid, email: user.email } : null, authCurrentUser: (firebase && firebase.auth && firebase.auth().currentUser) ? { uid: firebase.auth().currentUser.uid } : null });
+            if(user){
+              setAuthUI(true, user.uid);
+            } else {
+              setAuthUI(false);
+            }
+          });
 
       // Note: sign-in UI removed from history page; top-page modal handles sign-in.
 
@@ -885,10 +908,13 @@ document.addEventListener('DOMContentLoaded', ()=>{
 
       // When auth changes to signed in, fetch initial remote and attach listener
       auth.onAuthStateChanged(async user => {
+        console.debug('history.js auth.onAuthStateChanged (main):', { time: new Date().toISOString(), user: user ? { uid: user.uid, email: user.email } : null, authCurrentUser: (firebase && firebase.auth && firebase.auth().currentUser) ? { uid: firebase.auth().currentUser.uid } : null });
         if(user){
+          console.debug('history.js: signed in -> fetching remote doc for', user.uid);
           setAuthUI(true, user.uid);
           try{
             const doc = await db.collection('users').doc(user.uid).get();
+            console.debug('history.js: remote doc fetched, exists=', !!(doc && doc.exists));
             if(doc.exists){
               const payload = doc.data().data || {};
               importAllFromJsonObj(payload, {merge:true});
@@ -899,6 +925,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
           }catch(e){ console.warn('初期リモート取得失敗', e); try{ showSyncError(e); }catch(_){ } }
           attachRemoteListener(user.uid);
         } else {
+          console.debug('history.js: auth changed -> signed out');
           setAuthUI(false);
           detachRemoteListener();
         }
