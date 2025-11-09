@@ -67,9 +67,12 @@ body{font-family:'Baloo 2','Inter',system-ui,-apple-system,'Segoe UI',Roboto,Hel
   background: linear-gradient(135deg, var(--heatmap-1, #667eea) 0%, var(--heatmap-2, #764ba2) 100%);
   min-height: 100vh;
 }
-.stats .big{font-size:30px;font-weight:700}
-.stats .mid{font-size:16px;margin-top:6px;color:var(--muted)}
-.stats .small{font-size:13px;color:var(--muted)}
+.stats .big{font-size:30px;font-weight:700;color:var(--text-strong)}
+.stats .mid{font-size:16px;margin-top:6px;color:var(--text-strong)}
+.stats .small{font-size:13px;color:var(--text-strong)}
+
+/* Ensure stat labels and numbers use stronger (darker) text for readability */
+.stat{color:var(--text-strong)}
 .bottle{position:relative;width:160px;height:260px;margin:18px auto;border-radius:28px;overflow:hidden;background:linear-gradient(180deg,var(--card),var(--bg-2));box-shadow:var(--shadow);border:1px solid var(--border)}
 .rim{position:absolute;inset:0;border-radius:28px;pointer-events:none}
 .sand{position:absolute;left:8px;right:8px;bottom:8px;height:calc(100% - 16px);overflow:hidden;border-radius:18px}
@@ -100,9 +103,9 @@ main{max-width:420px;margin:0 auto;padding:8px}
 @media (prefers-reduced-motion: reduce){*{transition:none!important}}
 
 /* Timer display */
-.timer{text-align:center;margin-top:6px}
-.timer > div:first-child{font-size:18px;font-weight:600}
-#timerDisplay{font-size:20px;letter-spacing:1px}
+.timer{text-align:center;margin-top:6px;color:var(--text-strong)}
+.timer > div:first-child{font-size:18px;font-weight:600;color:var(--text-strong)}
+#timerDisplay{font-size:20px;letter-spacing:1px;color:var(--text-strong)}
 
 .countdown-ui{text-align:center;margin-top:12px;display:flex;flex-direction:column;align-items:center;gap:14px}
 .circle-wrap{position:relative;width:160px;height:160px;margin:0 auto 8px auto;display:flex;align-items:center;justify-content:center}
@@ -110,8 +113,8 @@ main{max-width:420px;margin:0 auto;padding:8px}
 .ring-bg{stroke:rgba(0,0,0,0.04)}
 .ring-fg{stroke:var(--accent);transition:stroke-dashoffset 0.5s linear}
 .circle-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
-.countdown-text{font-size:22px;font-weight:700;font-family:monospace}
-.countdown-sub{font-size:12px;color:var(--muted)}
+.countdown-text{font-size:22px;font-weight:700;font-family:monospace;color:var(--text-strong)}
+.countdown-sub{font-size:12px;color:var(--text-strong)}
 .countdown-controls{margin-top:8px;display:flex;gap:8px;justify-content:center}
 .countdown-controls button{padding:8px 12px;border-radius:6px;border:1px solid var(--border);background:var(--btn-bg)}
 
