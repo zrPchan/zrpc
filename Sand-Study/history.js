@@ -774,16 +774,39 @@ document.addEventListener('DOMContentLoaded', ()=>{
 
   // Firebase helper functions (require firebase global)
   let firebaseInited = false;
-  function initFirebaseIfAvailable(){
+
+  // small loader used when history page is opened directly (it doesn't include main.js)
+  function loadScript(src){
+    return new Promise((resolve, reject)=>{
+      const s = document.createElement('script');
+      s.src = src;
+      s.async = true;
+      s.onload = ()=>resolve(s);
+      s.onerror = (e)=>reject(new Error('Failed to load '+src));
+      document.head.appendChild(s);
+    });
+  }
+
+  async function initFirebaseIfAvailable(){
     if(firebaseInited) return;
-    if(typeof window.firebase === 'undefined'){
-      // No Firebase SDK loaded; leave controls disabled
-      setAuthUI(false);
-      return;
-    }
     try{
-      // Placeholder config: replace with your Firebase project config
-      const firebaseConfig = window.__FIREBASE_CONFIG__ || {
+      // If firebase not present, try to load compat SDKs and optional local config
+      if(typeof window.firebase === 'undefined'){
+        try{
+          await loadScript('https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js');
+          await loadScript('https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js');
+          await loadScript('https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js');
+          // try to load local config script which should set window.FIREBASE_CONFIG
+          try{ await loadScript('/assets/js/firebase-config.js'); }catch(_){ /* ignore */ }
+        }catch(e){
+          console.warn('Failed to load Firebase SDKs on history page', e);
+          setAuthUI(false);
+          return;
+        }
+      }
+
+      // Placeholder config: replace with your Firebase project config or provide /assets/js/firebase-config.js
+      const firebaseConfig = window.FIREBASE_CONFIG || window.__FIREBASE_CONFIG__ || {
         apiKey: "<API_KEY>",
         authDomain: "<PROJECT_ID>.firebaseapp.com",
         projectId: "<PROJECT_ID>",

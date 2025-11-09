@@ -63,8 +63,12 @@ document.addEventListener('DOMContentLoaded', async ()=>{
 		const email = emailEl && emailEl.value && emailEl.value.trim();
 		const password = passEl && passEl.value || '';
 		if(!email || !password){ alert('メールとパスワードを入力してください'); return; }
-		if(typeof window.firebase === 'undefined' || !window.firebase.auth){ alert('Firebase が読み込まれていません。設定してください。'); return; }
+		// Ensure Firebase SDKs/config are loaded before attempting sign-in
+		const ok = await tryInitFirebase();
+		if(!ok || typeof window.firebase === 'undefined' || !window.firebase.auth){ alert('Firebase が読み込まれていません。設定してください。'); return; }
 		try{
+			// Ensure persistence so auth state survives page reloads
+			try{ await firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL); }catch(e){ console.warn('setPersistence failed', e); }
 			await firebase.auth().signInWithEmailAndPassword(email, password);
 			statusEl && (statusEl.textContent = 'サインインに成功しました');
 			hideModal();
@@ -75,8 +79,12 @@ document.addEventListener('DOMContentLoaded', async ()=>{
 		const email = emailEl && emailEl.value && emailEl.value.trim();
 		const password = passEl && passEl.value || '';
 		if(!email || !password){ alert('メールとパスワードを入力してください'); return; }
-		if(typeof window.firebase === 'undefined' || !window.firebase.auth){ alert('Firebase が読み込まれていません。設定してください。'); return; }
+		// Ensure Firebase SDKs/config are loaded before attempting registration
+		const ok = await tryInitFirebase();
+		if(!ok || typeof window.firebase === 'undefined' || !window.firebase.auth){ alert('Firebase が読み込まれていません。設定してください。'); return; }
 		try{
+			// Ensure persistence so auth state survives page reloads
+			try{ await firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL); }catch(e){ console.warn('setPersistence failed', e); }
 			await firebase.auth().createUserWithEmailAndPassword(email, password);
 			statusEl && (statusEl.textContent = 'アカウント作成とログインに成功しました');
 			hideModal();

@@ -18,3 +18,4 @@ window.FIREBASE_CONFIG = {
   measurementId: "G-VFDML50CWV"
 };
 // Note: main.js will dynamically load the compat SDKs and call firebase.initializeApp(window.FIREBASE_CONFIG)
+
