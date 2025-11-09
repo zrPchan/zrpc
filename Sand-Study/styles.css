@@ -404,7 +404,7 @@ button:disabled{opacity:0.5;cursor:not-allowed}
 .date-range-controls .preset-wrap{ display:flex; gap:8px }
 .preset-btn{ padding:6px 10px; border-radius:8px; border:1px solid var(--border); background:linear-gradient(180deg,#ffffff,#fbfbfb); cursor:pointer; font-weight:600 }
 .preset-btn:hover{ transform:translateY(-1px); box-shadow:0 6px 16px rgba(0,0,0,0.04) }
-.@media (max-width:600px){ .date-range-controls{ flex-direction:column; align-items:flex-start } }
+@media (max-width:600px){ .date-range-controls{ flex-direction:column; align-items:flex-start } }
 .container-heatmap{
   max-width: 3000px;
   margin: 18px auto;
@@ -527,6 +527,13 @@ button:disabled{opacity:0.5;cursor:not-allowed}
 .history-controls label{font-size:14px}
 .history-controls input[type="date"], .history-controls input[type="time"], .history-controls input[type="number"]{padding:6px 8px;border:1px solid var(--border);border-radius:6px}
 .history-controls button{padding:8px 12px;border-radius:8px}
+
+/* Sync controls (Firebase auth + upload/download) */
+#syncControls{display:flex;gap:8px;align-items:center;justify-content:center}
+#syncControls #syncStatus{color:var(--muted);font-size:13px}
+#btnSignOut{display:none}
+#syncControls label{align-self:center;font-size:13px}
+#syncControls input[type="checkbox"]{margin-right:6px}
 
 /* Inline debug panel fallback styles moved here to satisfy linter */
 .debug-panel{max-width:640px;margin:20px auto;padding:12px;border-radius:8px;background:rgba(59,130,246,0.06)}

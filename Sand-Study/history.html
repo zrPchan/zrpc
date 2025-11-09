@@ -210,6 +210,15 @@
             </select>
             <button id="exportCsv" class="btn-outline">エクスポート</button>
           </div>
+            <!-- Row 4: Sync / Auth controls (Firebase) -->
+            <div class="controls-row" id="syncControls" style="gap:8px;">
+              <button id="btnSignIn" class="btn-primary">サインイン（Google）</button>
+              <button id="btnSignOut" class="btn-outline" style="display:none;">サインアウト</button>
+              <span id="syncStatus" style="align-self:center;color:var(--muted);font-size:13px">未接続</span>
+              <button id="btnUpload" class="btn-primary" disabled>アップロード</button>
+              <button id="btnDownload" class="btn-outline" disabled>ダウンロード</button>
+              <label style="align-self:center;font-size:13px"><input type="checkbox" id="optMerge" style="margin-right:6px">マージ</label>
+            </div>
         </div>
       </div>
     </header>

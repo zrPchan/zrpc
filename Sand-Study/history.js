@@ -702,6 +702,139 @@ document.addEventListener('DOMContentLoaded', ()=>{
   
   // 初期描画を実行
   renderAll();
+
+  // -----------------------------
+  // Firebase sync (placeholder) - login required for upload/download
+  // -----------------------------
+  // If Firebase SDK is loaded via CDN, this block will initialize; otherwise controls remain disabled.
+  const btnSignIn = document.getElementById('btnSignIn');
+  const btnSignOut = document.getElementById('btnSignOut');
+  const btnUpload = document.getElementById('btnUpload');
+  const btnDownload = document.getElementById('btnDownload');
+  const syncStatus = document.getElementById('syncStatus');
+  const optMerge = document.getElementById('optMerge');
+
+  function setAuthUI(signedIn, uid){
+    if(signedIn){
+      btnSignIn.style.display = 'none';
+      btnSignOut.style.display = '';
+      btnUpload.disabled = false;
+      btnDownload.disabled = false;
+      syncStatus.textContent = '接続: ' + (uid || '認証済み');
+    } else {
+      btnSignIn.style.display = '';
+      btnSignOut.style.display = 'none';
+      btnUpload.disabled = true;
+      btnDownload.disabled = true;
+      syncStatus.textContent = '未接続';
+    }
+  }
+
+  // Utility: collect all tasks/daily into object
+  function exportAllLocalStorageAsObject(){
+    const out = { tasks: {}, daily: {} };
+    for(let i=0;i<localStorage.length;i++){
+      const k = localStorage.key(i);
+      try{
+        if(k && k.startsWith('tasks:')) out.tasks[k] = JSON.parse(localStorage.getItem(k) || '[]');
+        if(k && k.startsWith('daily:')) out.daily[k] = JSON.parse(localStorage.getItem(k) || '{}');
+      }catch(e){ /* ignore malformed entries */ }
+    }
+    return out;
+  }
+
+  // Import object into localStorage (merge option supported)
+  function importAllFromJsonObj(obj, opts = {merge:false}){
+    if(!obj) return;
+    if(!opts.merge){
+      // overwrite all provided keys
+      Object.entries(obj.tasks || {}).forEach(([k,v]) => localStorage.setItem(k, JSON.stringify(v)));
+      Object.entries(obj.daily || {}).forEach(([k,v]) => localStorage.setItem(k, JSON.stringify(v)));
+      return;
+    }
+    // merge: simple concat for tasks, shallow merge for daily
+    Object.entries(obj.tasks || {}).forEach(([k,v]) => {
+      const existing = JSON.parse(localStorage.getItem(k) || '[]');
+      const merged = existing.concat(v).sort((a,b)=> (a.createdAt||0)-(b.createdAt||0));
+      localStorage.setItem(k, JSON.stringify(merged));
+    });
+    Object.entries(obj.daily || {}).forEach(([k,v]) => {
+      const existing = JSON.parse(localStorage.getItem(k) || '{}');
+      localStorage.setItem(k, JSON.stringify(Object.assign({}, existing, v)));
+    });
+  }
+
+  // Firebase helper functions (require firebase global)
+  let firebaseInited = false;
+  function initFirebaseIfAvailable(){
+    if(firebaseInited) return;
+    if(typeof window.firebase === 'undefined'){
+      // No Firebase SDK loaded; leave controls disabled
+      setAuthUI(false);
+      return;
+    }
+    try{
+      // Placeholder config: replace with your Firebase project config
+      const firebaseConfig = window.__FIREBASE_CONFIG__ || {
+        apiKey: "<API_KEY>",
+        authDomain: "<PROJECT_ID>.firebaseapp.com",
+        projectId: "<PROJECT_ID>",
+      };
+      if(!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+      const auth = firebase.auth();
+      const db = firebase.firestore();
+
+      auth.onAuthStateChanged(user => {
+        if(user){
+          setAuthUI(true, user.uid);
+        } else {
+          setAuthUI(false);
+        }
+      });
+
+      btnSignIn?.addEventListener('click', async ()=>{
+        try{
+          const provider = new firebase.auth.GoogleAuthProvider();
+          await auth.signInWithPopup(provider);
+        }catch(err){ alert('サインインに失敗しました: '+String(err)); }
+      });
+      btnSignOut?.addEventListener('click', async ()=>{ try{ await auth.signOut(); }catch(e){}});
+
+      // Upload current localStorage to Firestore (user doc)
+      btnUpload?.addEventListener('click', async ()=>{
+        const user = auth.currentUser;
+        if(!user){ alert('ログインしてください'); return; }
+        if(!confirm('リモートにアップロードするとリモートのデータが上書きされます。続行しますか？')) return;
+        try{
+          const payload = exportAllLocalStorageAsObject();
+          await db.collection('users').doc(user.uid).set({ data: payload, updatedAt: firebase.firestore.FieldValue.serverTimestamp() });
+          alert('アップロード完了しました');
+        }catch(err){ alert('アップロード失敗: '+String(err)); }
+      });
+
+      // Download remote -> local (overwrite or merge)
+      btnDownload?.addEventListener('click', async ()=>{
+        const user = auth.currentUser;
+        if(!user){ alert('ログインしてください'); return; }
+        try{
+          const doc = await db.collection('users').doc(user.uid).get();
+          if(!doc.exists){ alert('リモートにデータが見つかりません'); return; }
+          const payload = doc.data().data || {};
+          const merge = !!(optMerge && optMerge.checked);
+          const doOverwrite = merge ? confirm('マージを実行します。続行しますか？') : confirm('リモートの内容でローカルを上書きします。続行しますか？');
+          if(!doOverwrite) return;
+          importAllFromJsonObj(payload, {merge});
+          alert('ダウンロードとインポートが完了しました');
+          renderAll();
+        }catch(err){ alert('ダウンロード失敗: '+String(err)); }
+      });
+
+      firebaseInited = true;
+    }catch(err){ console.warn('Firebase init error', err); setAuthUI(false); }
+  }
+
+  // Try to initialize Firebase (if SDK loaded later, you can call this from console)
+  try{ initFirebaseIfAvailable(); }catch(e){ console.warn('init firebase failed', e); }
   
   // Add resize listener for responsive canvas
   let resizeTimeout;
