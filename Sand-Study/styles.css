@@ -48,6 +48,22 @@
   --update-bg: #0b63ff;
 }
 
+/* If a background-theme (bg-theme-*) class is added to the html element,
+   force the page background to use the bg-theme variables so the Sand-Study
+   picker wins over the shared site stylesheet (which also sets body background).
+   We use a higher-specificity selector (html[class*="bg-theme-"] body)
+   so this rule overrides the generic `body { background: ... }` in
+   ../assets/css/styles.css even when that sheet is loaded after this file.
+*/
+html[class*="bg-theme-"] body{
+  background: linear-gradient(180deg, var(--bg-1), var(--bg-2));
+  min-height: 100vh;
+}
+
+/* Remove the decorative radial glows from the shared stylesheet for the
+   bg-theme pages so the background colors stay visually consistent. */
+html[class*="bg-theme-"] body::before{ background: none; }
+
 /* centralize main content columns (bottle list, heatmaps, headings) */
 .bottle-list,
 .container-heatmap,
