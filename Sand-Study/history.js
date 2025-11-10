@@ -888,10 +888,12 @@ document.addEventListener('DOMContentLoaded', ()=>{
         try{
           syncStatus && (syncStatus.textContent = 'アップロード中...');
           const payload = exportAllLocalStorageAsObject();
+          try{ console.debug('doUploadNow: user=', user && user.uid, 'payloadKeys=', Object.keys(payload).length, 'tasksKeys=', Object.keys(payload.tasks||{}).length, 'dailyKeys=', Object.keys(payload.daily||{}).length); }catch(_){ }
           await db.collection('users').doc(user.uid).set({ data: payload, updatedAt: firebase.firestore.FieldValue.serverTimestamp() });
           lastLocalWrite = Date.now();
           lastLocalSnapshot = JSON.stringify(payload);
           syncStatus && (syncStatus.textContent = 'アップロード完了: ' + new Date().toLocaleTimeString());
+          console.debug('doUploadNow: upload finished for user=', user && user.uid);
         }catch(e){ console.warn('手動アップロード失敗', e); syncStatus && (syncStatus.textContent = 'アップロード失敗'); }
       }
 
@@ -901,12 +903,17 @@ document.addEventListener('DOMContentLoaded', ()=>{
         try{
           syncStatus && (syncStatus.textContent = 'ダウンロード中...');
           const doc = await db.collection('users').doc(user.uid).get();
+          console.debug('doDownloadNow: fetched doc exists=', !!(doc && doc.exists));
           if(doc && doc.exists){
-            const payload = doc.data().data || {};
+            const full = doc.data();
+            console.debug('doDownloadNow: remote doc data keys=', Object.keys(full || {}));
+            const payload = full.data || {};
+            try{ console.debug('doDownloadNow: payload summary tasks=', Object.keys(payload.tasks||{}).length, 'daily=', Object.keys(payload.daily||{}).length); }catch(_){ }
             importAllFromJsonObj(payload, {merge:true});
             lastLocalSnapshot = JSON.stringify(exportAllLocalStorageAsObject());
             renderAll();
             syncStatus && (syncStatus.textContent = 'ダウンロード完了: ' + new Date().toLocaleTimeString());
+            console.debug('doDownloadNow: import applied, local keys=', Object.keys(exportAllLocalStorageAsObject()).length);
           } else {
             syncStatus && (syncStatus.textContent = 'リモートにデータがありません');
           }
