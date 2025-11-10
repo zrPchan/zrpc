@@ -41,13 +41,11 @@ main{max-width:900px;margin:0 auto;padding:80px 24px 40px;position:relative;z-in
 header{text-align:center;margin-bottom:60px}
 header{position:relative}
 
-/* Top-right action buttons (ログイン / 設定) */
-.top-actions{position:fixed;right:24px;top:24px;display:flex;gap:8px;align-items:center;z-index:50}
-.top-actions .button{padding:8px 12px;font-size:0.9rem;box-shadow:0 6px 18px rgba(9,30,66,0.08);border:1px solid rgba(255,255,255,0.06)}
-
-/* Emergency visibility override: ensure top-actions appear above other content */
-.top-actions{position:fixed!important;right:16px!important;top:16px!important;z-index:9999!important}
-.top-actions .button{background:var(--card)!important;color:var(--text)!important;border:1px solid rgba(255,255,255,0.06)!important}
+/* Top-right action buttons (ログイン / 設定)
+    Place them inside page header (header is positioned relative), so they sit at
+    the top-right of the header area and behave consistently across pages. */
+.top-actions{position:absolute;right:24px;top:16px;display:flex;gap:8px;align-items:center;z-index:50}
+.top-actions .button{padding:8px 12px;font-size:0.9rem;box-shadow:0 6px 18px rgba(9,30,66,0.08);border:1px solid rgba(255,255,255,0.06);background:var(--card);color:var(--text);border:1px solid rgba(255,255,255,0.06)}
 .top-actions .button:focus{outline:2px solid hsla(var(--theme-hue),85%,52%,0.18)!important}
 h1{
     font-size:3.5rem;

@@ -48,6 +48,23 @@ document.addEventListener('DOMContentLoaded', async ()=>{
 	const emailEl = document.getElementById('topAuthEmail');
 	const passEl = document.getElementById('topAuthPassword');
 
+	// Helper to update login UI consistently across pages. This is declared
+	// regardless of firebase presence so it can be called by auth listener when
+	// firebase becomes available after a delayed initializer.
+	function updateLoginUI(isSignedIn){
+		try{ localStorage.setItem('signedIn', isSignedIn ? '1' : '0'); }catch(e){}
+		if(!btn) return;
+		if(isSignedIn){
+			btn.textContent = 'ログイン済み';
+			// Remove modal-opening behavior while signed in
+			try{ btn.removeEventListener('click', showModal); }catch(e){}
+		} else {
+			btn.textContent = 'ログイン';
+			// restore modal opener
+			try{ btn.addEventListener('click', (e)=>{ e.preventDefault(); showModal(); if(emailEl) emailEl.focus(); }); }catch(e){}
+		}
+	}
+
 	function showModal(){ if(modal){ modal.setAttribute('aria-hidden','false'); } }
 	function hideModal(){ if(modal){ modal.setAttribute('aria-hidden','true'); } }
 
@@ -92,40 +109,27 @@ document.addEventListener('DOMContentLoaded', async ()=>{
 	btnLogin?.addEventListener('click', (e)=>{ e.preventDefault(); trySignIn(); });
 	btnRegister?.addEventListener('click', (e)=>{ e.preventDefault(); tryRegister(); });
 
-	// Optional: update UI on auth state change
-	if(typeof window.firebase !== 'undefined' && window.firebase.auth){
-		function updateLoginUI(isSignedIn){
-			try{ localStorage.setItem('signedIn', isSignedIn ? '1' : '0'); }catch(e){}
-			if(!btn) return;
-			if(isSignedIn){
-				// Show logged-in state text
-				btn.textContent = 'ログイン済み';
-				// Remove modal-opening behavior while signed in
-				try{ btn.removeEventListener('click', showModal); }catch(e){}
-			} else {
-				btn.textContent = 'ログイン';
-				// restore modal opener
-				try{ btn.addEventListener('click', (e)=>{ e.preventDefault(); showModal(); if(emailEl) emailEl.focus(); }); }catch(e){}
-			}
-		}
-
+	// Ensure auth listener is attached even if firebase loads after DOMContentLoaded.
+	let authListenerAttached = false;
+	function attachAuthListener(){
+		if(authListenerAttached) return;
+		if(typeof window.firebase === 'undefined' || !window.firebase.auth) return;
+		authListenerAttached = true;
 		firebase.auth().onAuthStateChanged(user => {
-			if(user){
-				updateLoginUI(true);
-			} else {
-				updateLoginUI(false);
-			}
+			try{ console.debug('main.js auth.onAuthStateChanged ->', user ? {uid:user.uid,email:user.email} : null); }catch(e){}
+			updateLoginUI(!!user);
 		});
-	} else {
-		// No Firebase: restore UI from localStorage (simple fallback)
-		try{
-			const val = localStorage.getItem('signedIn');
-			if(val === '1'){
-				btn && (btn.textContent = 'ログイン済み');
-			} else {
-				btn && (btn.textContent = 'ログイン');
-			}
-		}catch(e){}
+	}
+
+	// Try immediate attach; if not available, poll briefly until available
+	attachAuthListener();
+	if(!authListenerAttached){
+		const waitInterval = setInterval(()=>{
+			attachAuthListener();
+			if(authListenerAttached) clearInterval(waitInterval);
+		}, 150);
+		// safety timeout to stop polling after 3s
+		setTimeout(()=>{ try{ clearInterval(waitInterval); }catch(e){} }, 3000);
 	}
 
 	// --- Diagnostic: top-actions visibility helper (logging only) ---

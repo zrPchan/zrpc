@@ -34,11 +34,13 @@
 </head>
 <body>
   <div class="container">
-  <!-- Top-right actions (ログイン / 設定) - injected so top-page login is available when serving Sand-Study -->
-  <div class="top-actions">
-    <a id="topBtnSettings" class="button" href="#">設定</a>
-    <a id="topBtnSignIn" class="button" href="#">ログイン</a>
-  </div>
+  <!-- Header (contains top-actions placed at top-right of header) -->
+  <header class="app-header">
+    <div class="top-actions">
+      <a id="topBtnSettings" class="button" href="#">設定</a>
+      <a id="topBtnSignIn" class="button" href="#">ログイン</a>
+    </div>
+  </header>
   <!-- Update banner: shown when a new app version / service worker is available -->
   <div id="updateBanner" role="status" aria-live="polite">
     <div class="msg">新しいバージョンがあります。</div>
