@@ -309,11 +309,35 @@
       (function(){
         try{
           var THEME_KEY = 'uiTheme:v1';
-          var saved = null;
-          try{ saved = localStorage.getItem(THEME_KEY); }catch(e){}
-          if(!saved) saved = 'sand';
-          var cls = 'theme-' + String(saved || 'sand');
-          try{ document.documentElement.classList.add(cls); }catch(e){}
+          var BG_THEME_KEY = 'uiBgTheme:v1';
+          var RING_COLOR_KEY = 'uiRingColor:v1';
+          var el = document.documentElement;
+
+          function removeClassPrefix(prefix){
+            try{
+              var remove = [];
+              el.classList.forEach(function(c){ if(c && c.indexOf(prefix)===0) remove.push(c); });
+              remove.forEach(function(c){ el.classList.remove(c); });
+            }catch(e){}
+          }
+
+          function applyThemeName(name){ if(!name) name = 'sand'; removeClassPrefix('theme-'); try{ el.classList.add('theme-' + String(name)); }catch(e){} }
+          function applyBgThemeName(name){ if(!name) name = 'sand'; removeClassPrefix('bg-theme-'); try{ el.classList.add('bg-theme-' + String(name)); }catch(e){} }
+          function applyRingColorName(color){ try{ if(!color){ el.style.removeProperty('--ring-color'); } else { el.style.setProperty('--ring-color', String(color)); } }catch(e){} }
+
+          // initial apply
+          try{ var saved = null; saved = localStorage.getItem(THEME_KEY); applyThemeName(saved); }catch(e){}
+          try{ var savedBg = null; savedBg = localStorage.getItem(BG_THEME_KEY); applyBgThemeName(savedBg); }catch(e){}
+          try{ var savedRing = null; savedRing = localStorage.getItem(RING_COLOR_KEY); applyRingColorName(savedRing); }catch(e){}
+
+          // react to storage events (when theme/bg-theme/ring is changed in another tab/window)
+          window.addEventListener('storage', function(ev){
+            try{
+              if(ev.key === THEME_KEY){ applyThemeName(ev.newValue); }
+              else if(ev.key === BG_THEME_KEY){ applyBgThemeName(ev.newValue); }
+              else if(ev.key === RING_COLOR_KEY){ applyRingColorName(ev.newValue); }
+            }catch(e){}
+          });
         }catch(e){ /* noop */ }
       })();
       // Hide debug panel unless in dev mode
