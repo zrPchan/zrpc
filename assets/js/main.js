@@ -148,4 +148,37 @@ document.addEventListener('DOMContentLoaded', async ()=>{
 			console.warn('DEBUG: .top-actions element not found in DOM');
 		}
 	} catch(e){ console.warn('DEBUG: error while running top-actions diagnostic', e); }
+
+	// Settings button: provide data wipe (local tasks/daily + remote Firestore doc)
+	try{
+		const settingsBtn = document.getElementById('topBtnSettings');
+		if(settingsBtn){
+			settingsBtn.addEventListener('click', async (ev)=>{
+				ev.preventDefault();
+				const ok = confirm('注意: データを完全に削除します。ローカルの記録と（サインイン中の場合）リモートの履歴も削除されます。よろしいですか？');
+				if(!ok) return;
+				try{
+					// try to stop session if function exists
+					try{ if(typeof performReset === 'function') performReset(); }catch(e){}
+					// remove app data keys: tasks:, daily:, cum_base, last_date, favTargets, pushSubscription
+					const delKeys = [];
+					for(let i=0;i<localStorage.length;i++){ const k = localStorage.key(i); if(!k) continue; if(k.startsWith('tasks:') || k.startsWith('daily:') ) delKeys.push(k); }
+					['cum_base','last_date', 'pushSubscription', 'favTargets:v1'].forEach(k=>{ if(localStorage.getItem(k)!==null) delKeys.push(k); });
+					delKeys.forEach(k=>{ try{ localStorage.removeItem(k); }catch(e){} });
+					// If signed in, also delete remote Firestore doc
+					try{
+						if(window.firebase && firebase.auth && firebase.auth().currentUser && firebase.firestore){
+							const uid = firebase.auth().currentUser.uid;
+							try{ await firebase.firestore().collection('users').doc(uid).delete(); console.debug('Settings: remote user doc deleted for', uid); }catch(e){ console.warn('Settings: failed to delete remote doc', e); }
+						}
+					}catch(e){ console.warn('Settings: remote delete check failed', e); }
+					// Re-render UI and notify
+					try{ if(typeof renderAll === 'function') try{ renderAll(); }catch(e){} }catch(e){}
+					alert('データを削除しました');
+					try{ if(window.firebase && firebase.auth && firebase.auth().currentUser){ await firebase.auth().signOut(); } }catch(e){ /* ignore */ }
+					window.location.reload();
+				}catch(e){ console.error('wipe failed', e); alert('データ削除に失敗しました。Console を確認してください。'); }
+			});
+		}
+	}catch(e){ console.warn('settings hook failed', e); }
 });
