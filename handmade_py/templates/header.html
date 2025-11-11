@@ -1,0 +1,15 @@
+<header class="site-header">
+  <a href="{{ url_for('home') }}" class="logo"><img src="{{ url_for('static', filename='images/icon-512.png') }}" alt="Sand-Study" style="height:32px;"></a>
+  <nav class="nav">
+    {% if logged_in %}
+      <span class="hello">こんにちは、{{ username or "User" }}</span>
+      <a href="/account" class="btn">アカウント</a>
+      <form action="/logout" method="post" style="display:inline">
+        <button type="submit" class="btn">ログアウト</button>
+      </form>
+    {% else %}
+      <a href="/login" class="btn">ログイン</a>
+      <a href="/signup" class="btn btn-primary">新規登録</a>
+    {% endif %}
+  </nav>
+</header>
