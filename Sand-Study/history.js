@@ -658,8 +658,11 @@ document.addEventListener('DOMContentLoaded', ()=>{
     const [hour, minute] = timeStr.split(':').map(Number);
     const timestamp = new Date(year, month - 1, day, hour, minute, 0).getTime() / 1000;
     
+    // Create debug log entry (ensure it has an id so sync/merge can dedupe reliably)
+    const genId = (() => { try{ return (crypto && typeof crypto.randomUUID === 'function') ? crypto.randomUUID() : null; }catch(e){ return null; } })();
     // Create debug log entry
     const debugEntry = {
+      id: genId || ('id-' + Date.now() + '-' + Math.floor(Math.random()*100000)),
       start: timestamp,
       createdAt: timestamp,
       mood: m,
@@ -756,7 +759,17 @@ document.addEventListener('DOMContentLoaded', ()=>{
     if(!obj) return;
     if(!opts.merge){
       // overwrite all provided keys
-      Object.entries(obj.tasks || {}).forEach(([k,v]) => localStorage.setItem(k, JSON.stringify(v)));
+      Object.entries(obj.tasks || {}).forEach(([k,v]) => {
+        try{
+          const arr = (v||[]).map(item => {
+            if(!item) return item;
+            try{ if(!item.id){ if(typeof crypto !== 'undefined' && crypto && typeof crypto.randomUUID === 'function') item.id = crypto.randomUUID(); } }catch(e){}
+            if(!item.id) item.id = 'id-' + (item.createdAt || Date.now()) + '-' + Math.floor(Math.random()*100000);
+            return item;
+          });
+          localStorage.setItem(k, JSON.stringify(arr));
+        }catch(e){ console.warn('Failed writing tasks overwrite for', k, e); }
+      });
       Object.entries(obj.daily || {}).forEach(([k,v]) => localStorage.setItem(k, JSON.stringify(v)));
       return;
     }
@@ -790,7 +803,19 @@ document.addEventListener('DOMContentLoaded', ()=>{
     Object.entries(obj.tasks || {}).forEach(([k,v]) => {
       try{
         const existing = JSON.parse(localStorage.getItem(k) || '[]');
-        const merged = dedupeTasksArray(existing.concat(v));
+        let merged = dedupeTasksArray(existing.concat(v));
+        // Ensure every task has an id so future merges/dedupe work reliably
+        merged = merged.map(item => {
+          try{
+            if(!item) return item;
+            if(!item.id){
+              try{ if(typeof crypto !== 'undefined' && crypto && typeof crypto.randomUUID === 'function') item.id = crypto.randomUUID();
+              }catch(e){ /* ignore */ }
+              if(!item.id) item.id = 'id-' + (item.createdAt || Date.now()) + '-' + Math.floor(Math.random()*100000);
+            }
+          }catch(e){}
+          return item;
+        });
         localStorage.setItem(k, JSON.stringify(merged));
       }catch(e){ console.warn('Failed merging tasks for', k, e); }
     });

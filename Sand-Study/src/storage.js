@@ -47,6 +47,13 @@ export function saveTask(t){
   try{
     const key = `tasks:${keyDay()}`;
     const arr = JSON.parse(localStorage.getItem(key) || "[]");
+    // ensure the task has a unique id
+    try{
+      if(!t.id){
+        if(typeof crypto !== 'undefined' && crypto && typeof crypto.randomUUID === 'function') t.id = crypto.randomUUID();
+        else t.id = 'id-' + Date.now() + '-' + Math.floor(Math.random()*100000);
+      }
+    }catch(e){ if(!t.id) t.id = 'id-' + Date.now() + '-' + Math.floor(Math.random()*100000); }
     arr.push(t);
     localStorage.setItem(key, JSON.stringify(arr));
     try{ if(typeof window !== 'undefined' && window.dispatchEvent){ window.dispatchEvent(new CustomEvent('sandstudy:tasks-changed',{detail:{action:'save', id:t && t.id}})); } }catch(e){}
