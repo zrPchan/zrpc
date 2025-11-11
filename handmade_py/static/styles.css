@@ -2,20 +2,41 @@
   --maxw:800px;
   --accent:#2b8cd6;
 }
+.site-header{
+  width:100%;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:8px 12px;
+  background:#fff;
+  border-bottom:1px solid #dfdfdf;
+  margin-bottom:16px;
+}
+
 body{
   font-family: system-ui, "Segoe UI", Roboto, "Hiragino Kaku Gothic ProN", "Yu Gothic", sans-serif;
   margin:0;
-  padding:20px;
-  display:flex;
   justify-content:center;
+  background:#ccc9a3;
 }
-#app{
-  width:100%;
+
+.container{
   max-width:var(--maxw);
+  width:100%;
+  margin:0 auto;
+  padding:0 12px;
 }
-h1{ color:var(--accent); margin-bottom:12px; }
-.hidden{ display:none; }
-.card{ border:1px solid #ddd; padding:12px; border-radius:6px; margin-bottom:12px; }
-.btn{ background:var(--accent); color:white; border:none; padding:8px 12px; border-radius:4px; cursor:pointer; }
-.option{ display:block; margin:8px 0; }
-.small{ font-size:0.9rem; color:#444; }
+
+main.container{
+  background:#fff; 
+  border-radius:12px; 
+  box-shadow:0 2px 8px rgba(0,0,0,.08); 
+  padding:24px;
+}
+
+.sand-jar{
+  width: 200px; /* ここで表示サイズを調整（%でも可） */
+  height: auto;
+  display: block;
+  align-items:center;
+}
